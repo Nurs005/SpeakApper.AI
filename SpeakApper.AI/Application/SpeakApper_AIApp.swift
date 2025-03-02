@@ -11,14 +11,15 @@ import Firebase
 @main
 struct SpeakApper_AIApp: App {
     let dependencies = Dependencies()
-    
+
     init() {
-        FirebaseApp.configure()
+        FirebaseApp.configure() // Добавляем Firebase
     }
 
     var body: some Scene {
         WindowGroup {
             MainView()
+            //MainView(dependencies: dependencies) // Используем зависимости
         }
     }
 }
