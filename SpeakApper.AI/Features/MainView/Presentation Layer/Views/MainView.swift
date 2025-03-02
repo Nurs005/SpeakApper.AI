@@ -9,14 +9,6 @@ import SwiftUI
 import AVFoundation
 
 struct MainView: View {
-<<<<<<< HEAD
-    @StateObject private var viewModel = RecordingViewModel()
-    @StateObject var authViewModel = AuthViewModel()
-    @State private var isRecordingPresented = false
-    @State private var hasSavedRecording = false
-    @Environment(\.dismiss) var dismiss
-    
-=======
     @StateObject private var recordingViewModel = RecordingViewModel()
     @StateObject private var viewModel: MainViewModel
     @State private var isRecordingPresented = false
@@ -27,7 +19,6 @@ struct MainView: View {
         self.dependencies = dependencies
         _viewModel = StateObject(wrappedValue: MainViewModel(dependencies: dependencies))
     }
->>>>>>> feature/daniyar/main-page
     
     var body: some View {
         contentBodyView
@@ -41,16 +32,10 @@ fileprivate extension MainView {
     var contentBodyView: some View {
         NavigationStack {
             ZStack {
-<<<<<<< HEAD
-                Color("BackgroundColor").ignoresSafeArea()
-                
-                VStack(alignment: .leading, spacing: 16) {
-=======
                 Color(.background)
                     .ignoresSafeArea()
                 
                 VStack(spacing: 16) {
->>>>>>> feature/daniyar/main-page
                     headerView
                     
                     scrollableView
@@ -81,38 +66,19 @@ fileprivate extension MainView {
                     FAQView()
                 }
             }
-<<<<<<< HEAD
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .foregroundColor(.white)
-        }
-        .onAppear {
-            viewModel.fetchRecordings()
-        }
-    }
-    
-    private var headerView: some View {
-        HStack {
-=======
         }
     }
 
     var headerView: some View {
         HStack(spacing: 0) {
->>>>>>> feature/daniyar/main-page
             Text("SpeakerApp")
                 .font(.system(size: 21, weight: .bold))
                 .foregroundColor(.white)
-            
+
             Spacer()
-<<<<<<< HEAD
-            
-            NavigationLink(destination: SettingsView()) {
-                Image("settings")
-=======
 
             NavigationLink(value: NavigationDestination.settings) {
                 Image(.settings)
->>>>>>> feature/daniyar/main-page
                     .resizable()
                     .frame(width: 24, height: 24)
             }
@@ -224,13 +190,8 @@ fileprivate extension MainView {
     var startRecordingButtonTipView: some View {
         Image(.startRecordingButtonTip)
     }
-<<<<<<< HEAD
-    
-    private var recordingsListView: some View {
-=======
 
     var recordingsListView: some View {
->>>>>>> feature/daniyar/main-page
         List {
             ForEach(recordingViewModel.filteredRecordings()) { recording in
                 NavigationLink(destination: RecordingDetailView(recording: recording)) {
@@ -243,75 +204,55 @@ fileprivate extension MainView {
         .listStyle(PlainListStyle())
         .background(Color("BackgroundColor").ignoresSafeArea())
     }
-<<<<<<< HEAD
-    
-    private func deleteRecording(at offsets: IndexSet) {
-=======
 
     func deleteRecording(at offsets: IndexSet) {
->>>>>>> feature/daniyar/main-page
         offsets.forEach { index in
             let recording = recordingViewModel.filteredRecordings()[index]
             recordingViewModel.deleteRecording(recording)
         }
     }
-<<<<<<< HEAD
-    
-    private func recordingRow(for recording: Recording) -> some View {
-=======
 
     func recordingRow(for recording: Recording) -> some View {
->>>>>>> feature/daniyar/main-page
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(recordingViewModel.transcriptions[recording.url]?.components(separatedBy: " ").prefix(4).joined(separator: " ") ?? "Новая запись")
                     .font(.headline)
                     .foregroundColor(.white)
-                
+
                 HStack(spacing: 8) {
                     Text(recording.formattedDate)
                         .font(.subheadline)
                         .foregroundColor(.gray)
-                    
+
                     Image(systemName: "clock")
                         .foregroundColor(.gray)
                         .font(.subheadline)
-                    
+
                     Text(getAudioDuration(for: recording))
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
             }
-            
+
             Spacer()
         }
         .frame(height: 28)
         .padding()
         .background(Color("BackgroundColor"))
     }
-<<<<<<< HEAD
-    
-    private func getAudioDuration(for recording: Recording) -> String {
-=======
 
     func getAudioDuration(for recording: Recording) -> String {
->>>>>>> feature/daniyar/main-page
         let asset = AVURLAsset(url: recording.url)
         let duration = asset.duration
         let durationInSeconds = CMTimeGetSeconds(duration)
-        
+
         let minutes = Int(durationInSeconds) / 60
         let seconds = Int(durationInSeconds) % 60
-        
+
         return String(format: "%02d:%02d", minutes, seconds)
     }
-<<<<<<< HEAD
-    
-    private var recordButton: some View {
-=======
 
     var recordButton: some View {
->>>>>>> feature/daniyar/main-page
         VStack {
             Spacer()
             Button(action: {
@@ -326,16 +267,6 @@ fileprivate extension MainView {
                 RecordingView(isPresented: $isRecordingPresented, viewModel: recordingViewModel, hasSavedRecording: $hasSavedRecording)
             }
             .padding(.bottom, 32)
-        }
-        .onAppear {
-            Task {
-                await authViewModel.checkLoginStatus()
-            }
-        }
-        .onChange(of: authViewModel.isLoggedIn) { newValue in
-            if newValue {
-                dismiss()
-            }
         }
     }
 }
