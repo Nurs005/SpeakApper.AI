@@ -54,29 +54,35 @@ fileprivate extension MainView {
             }
             .navigationDestination(for: NavigationDestination.self) { destination in
                 switch destination {
-                case .settings:
-                    SettingsView()
-                case .import:
-                    ImportRecordView()
-                case .youtube:
-                    YoutubeView()
-                case .newFeature:
-                    AIIdeaView()
-                case .faq:
-                    FAQView()
+                    case .settings:
+                        SettingsView()
+                    case .import:
+                        ImportRecordView()
+                    case .youtube:
+                        YoutubeView()
+                    case .newFeature:
+                        AIIdeaView()
+                    case .faq:
+                        FAQView()
+                    case .login:
+                        LoginView()
+                    case .authCode:
+                        AuthCodeView(authViewModel: AuthViewModel(email: email))
+                    case .accountSettings:
+                        AccountSettingsView()
                 }
             }
         }
     }
-
+    
     var headerView: some View {
         HStack(spacing: 0) {
             Text("SpeakerApp")
                 .font(.system(size: 21, weight: .bold))
                 .foregroundColor(.white)
-
+            
             Spacer()
-
+            
             NavigationLink(value: NavigationDestination.settings) {
                 Image(.settings)
                     .resizable()
@@ -190,7 +196,7 @@ fileprivate extension MainView {
     var startRecordingButtonTipView: some View {
         Image(.startRecordingButtonTip)
     }
-
+    
     var recordingsListView: some View {
         List {
             ForEach(recordingViewModel.filteredRecordings()) { recording in
@@ -204,54 +210,54 @@ fileprivate extension MainView {
         .listStyle(PlainListStyle())
         .background(Color("BackgroundColor").ignoresSafeArea())
     }
-
+    
     func deleteRecording(at offsets: IndexSet) {
         offsets.forEach { index in
             let recording = recordingViewModel.filteredRecordings()[index]
             recordingViewModel.deleteRecording(recording)
         }
     }
-
+    
     func recordingRow(for recording: Recording) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(recordingViewModel.transcriptions[recording.url]?.components(separatedBy: " ").prefix(4).joined(separator: " ") ?? "Новая запись")
                     .font(.headline)
                     .foregroundColor(.white)
-
+                
                 HStack(spacing: 8) {
                     Text(recording.formattedDate)
                         .font(.subheadline)
                         .foregroundColor(.gray)
-
+                    
                     Image(systemName: "clock")
                         .foregroundColor(.gray)
                         .font(.subheadline)
-
+                    
                     Text(getAudioDuration(for: recording))
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
             }
-
+            
             Spacer()
         }
         .frame(height: 28)
         .padding()
         .background(Color("BackgroundColor"))
     }
-
+    
     func getAudioDuration(for recording: Recording) -> String {
         let asset = AVURLAsset(url: recording.url)
         let duration = asset.duration
         let durationInSeconds = CMTimeGetSeconds(duration)
-
+        
         let minutes = Int(durationInSeconds) / 60
         let seconds = Int(durationInSeconds) % 60
-
+        
         return String(format: "%02d:%02d", minutes, seconds)
     }
-
+    
     var recordButton: some View {
         VStack {
             Spacer()
