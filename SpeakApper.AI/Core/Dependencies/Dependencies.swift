@@ -7,10 +7,19 @@
 
 import Foundation
 
-final class Dependencies {
+protocol HasRecordingRepository {
+    var recordingRepository: RecordingRepositoryInterface { get }
+}
+
+final class Dependencies:
+    HasRecordingRepository {
     private let network: Networking
+    var recordingRepository: any RecordingRepositoryInterface
     
     init() {
         self.network = Network()
+        recordingRepository = RecordingRepository(localDataSource: RecordingLocalDataSource())
     }
 }
+
+extension Dependencies: ObservableObject {}

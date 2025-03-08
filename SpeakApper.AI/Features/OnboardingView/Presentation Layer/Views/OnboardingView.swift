@@ -14,7 +14,7 @@ struct OnboardingView: View {
 
     var body: some View {
         if isOnboardingFinished {
-            MainView()
+//            MainView()
         } else {
             VStack {
                 if showOnboarding {
