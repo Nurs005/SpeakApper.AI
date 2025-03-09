@@ -30,7 +30,7 @@ fileprivate extension LoginView {
                 title
                 subtitle
                 emailField
-                continueButton
+             //   continueButton
                 separator
                 appleSignInButton
                 Spacer()
@@ -75,26 +75,26 @@ fileprivate extension LoginView {
             .padding(.bottom, 16)
     }
     
-    var continueButton: some View {
-        NavigationLink(destination: NavigationDestination.authCode(email: email)) {
-            Text("Продолжить")
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color("ButtonColor"))
-                .cornerRadius(10)
-        }
-        .simultaneousGesture(TapGesture().onEnded {
-            guard !email.isEmpty else { return }
-            authViewModel.email = email
-            Task {
-                await authViewModel.sendOTP(to: email)
-            }
-        })
-        .disabled(email.isEmpty)
-        .opacity(email.isEmpty ? 0.5 : 1.0)
-    }
+//    var continueButton: some View {
+//        NavigationLink(destination: NavigationDestination.authCode(email: email)) {
+//            Text("Продолжить")
+//                .font(.headline)
+//                .foregroundColor(.white)
+//                .frame(maxWidth: .infinity)
+//                .padding()
+//                .background(Color("ButtonColor"))
+//                .cornerRadius(10)
+//        }
+//        .simultaneousGesture(TapGesture().onEnded {
+//            guard !email.isEmpty else { return }
+//            authViewModel.email = email
+//            Task {
+//                await authViewModel.sendOTP(to: email)
+//            }
+//        })
+//        .disabled(email.isEmpty)
+//        .opacity(email.isEmpty ? 0.5 : 1.0)
+//    }
 
     
     

@@ -11,17 +11,11 @@ import Firebase
 @main
 struct SpeakApper_AIApp: App {
     let dependencies = Dependencies()
+    let coordinator = Coordinator()
 
     init() {
         FirebaseApp.configure() 
     }
-
-    var body: some Scene {
-        WindowGroup {
-            
-            MainView(dependencies: dependencies)
-
-    let coordinator = Coordinator()
     
     var body: some Scene {
         WindowGroup {

@@ -71,7 +71,6 @@ fileprivate extension SettingsView {
     }
 
     var accountButton: some View {
-        NavigationLink(destination: NavigationDestination.login) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(authViewModel.email.isEmpty ? "Гость" : authViewModel.email)
@@ -85,7 +84,7 @@ fileprivate extension SettingsView {
                 Image(systemName: "chevron.right")
                     .foregroundStyle(.gray)
             }
-        }
+      
         .padding(.horizontal, 16)
     }
 
