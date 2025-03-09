@@ -10,11 +10,12 @@ import SwiftUI
 @main
 struct SpeakApper_AIApp: App {
     let dependencies = Dependencies()
+    let coordinator = Coordinator()
     
     var body: some Scene {
         WindowGroup {
-//            OnboardingView()
-            MainView(dependencies: dependencies)
+            CoordinatorView(coordinator: coordinator,
+                            dependencies: dependencies)
         }
     }
 }
