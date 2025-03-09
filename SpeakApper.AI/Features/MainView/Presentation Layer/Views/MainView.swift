@@ -9,63 +9,40 @@ import SwiftUI
 import AVFoundation
 
 struct MainView: View {
+    @ObservedObject var viewModel: MainViewModel
+    @Environment(Coordinator.self) var coordinator
+    
     @StateObject private var recordingViewModel = RecordingViewModel()
-    @StateObject private var viewModel: MainViewModel
     @State private var isRecordingPresented = false
     @State private var hasSavedRecording = false
-    private let dependencies: Dependencies
-    
-    init(dependencies: Dependencies) {
-        self.dependencies = dependencies
-        _viewModel = StateObject(wrappedValue: MainViewModel(dependencies: dependencies))
-    }
     
     var body: some View {
         contentBodyView
-            .fullScreenCover(isPresented: $isRecordingPresented) {
-                RecordingView(isPresented: $isRecordingPresented, viewModel: recordingViewModel, hasSavedRecording: $hasSavedRecording)
-            }
     }
 }
 
 fileprivate extension MainView {
     var contentBodyView: some View {
-        NavigationStack {
-            ZStack {
-                Color(.background)
-                    .ignoresSafeArea()
+        ZStack {
+            Color(.background)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 16) {
+                headerView
                 
-                VStack(spacing: 16) {
-                    headerView
-                    
-                    scrollableView
-                    
-                    Spacer()
-                }
-                .overlay(alignment: .bottom) {
-                    VStack(spacing: 38) {
-                        recordingTipView
-                        
-                        startRecordingButtonView
-                    }
-                    .padding(.bottom, 30)
-                }
-                .padding(.horizontal, 16)
+                scrollableView
+                
+                Spacer()
             }
-            .navigationDestination(for: NavigationDestination.self) { destination in
-                switch destination {
-                case .settings:
-                    SettingsView()
-                case .import:
-                    ImportRecordView()
-                case .youtube:
-                    YoutubeView()
-                case .newFeature:
-                    AIIdeaView()
-                case .faq:
-                    FAQView()
+            .overlay(alignment: .bottom) {
+                VStack(spacing: 38) {
+                    recordingTipView
+                    
+                    startRecordingButtonView
                 }
+                .padding(.bottom, 30)
             }
+            .padding(.horizontal, 16)
         }
     }
 
@@ -74,10 +51,12 @@ fileprivate extension MainView {
             Text("SpeakerApp")
                 .font(.system(size: 21, weight: .bold))
                 .foregroundColor(.white)
-
+            
             Spacer()
-
-            NavigationLink(value: NavigationDestination.settings) {
+            
+            Button {
+                coordinator.push(.settings)
+            } label: {
                 Image(.settings)
                     .resizable()
                     .frame(width: 24, height: 24)
@@ -137,9 +116,10 @@ fileprivate extension MainView {
     var quickActionsView: some View {
         HStack(alignment: .top, spacing: 27) {
             ForEach(QuickActionType.allCases, id: \.self) { actionType in
-                NavigationLink(value: actionType.navigationDestination) {
-                    QuickActionView(actionType: actionType)
-                }
+                QuickActionView(actionType: actionType)
+                    .onTapGesture {
+                        coordinator.presentSheet(actionType.sheet)
+                    }
             }
         }
     }
@@ -177,7 +157,7 @@ fileprivate extension MainView {
     
     var startRecordingButtonView: some View {
         Button {
-            isRecordingPresented.toggle()
+            coordinator.push(.recording)
         } label: {
             Image(.startRecordingButton)
                 .overlay(alignment: .bottom) {
@@ -250,23 +230,5 @@ fileprivate extension MainView {
         let seconds = Int(durationInSeconds) % 60
 
         return String(format: "%02d:%02d", minutes, seconds)
-    }
-
-    var recordButton: some View {
-        VStack {
-            Spacer()
-            Button(action: {
-                isRecordingPresented = true
-            }) {
-                Image("Bttn")
-                    .resizable()
-                    .frame(width: 144, height: 144)
-                    .foregroundColor(Color("micColor"))
-            }
-            .fullScreenCover(isPresented: $isRecordingPresented) {
-                RecordingView(isPresented: $isRecordingPresented, viewModel: recordingViewModel, hasSavedRecording: $hasSavedRecording)
-            }
-            .padding(.bottom, 32)
-        }
     }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PaywallView: View {
-    @StateObject private var paywallViewModel = PaywallViewModel()
+    @ObservedObject var paywallViewModel: PaywallViewModel
     @State private var currentIndex = 0
     @Binding var isOnboardingFinished: Bool
     private let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()

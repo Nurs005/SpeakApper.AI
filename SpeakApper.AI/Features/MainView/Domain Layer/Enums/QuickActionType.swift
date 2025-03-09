@@ -39,7 +39,7 @@ enum QuickActionType: CaseIterable {
         }
     }
     
-    var navigationDestination: NavigationDestination {
+    var sheet: Sheet {
         switch self {
         case .import:
             return .import

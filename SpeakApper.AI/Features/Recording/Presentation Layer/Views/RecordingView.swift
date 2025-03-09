@@ -9,9 +9,9 @@ import SwiftUI
 import AVFoundation
 
 struct RecordingView: View {
-    @Binding var isPresented: Bool
+//    @Binding var isPresented: Bool
     @ObservedObject var viewModel: RecordingViewModel
-    @Binding var hasSavedRecording: Bool
+//    @Binding var hasSavedRecording: Bool
     
     @State private var recordingTime: TimeInterval = 0
     @State private var timer: Timer? = nil
@@ -42,7 +42,7 @@ struct RecordingView: View {
                 HStack(spacing: 36) {
                     Button(action: {
                         stopRecording(delete: true)
-                        isPresented = false
+//                        isPresented = false
                     }) {
                         VStack {
                             Image("xmarcBttn")
@@ -57,8 +57,8 @@ struct RecordingView: View {
                     
                     Button(action: {
                         stopRecording(delete: false)
-                        hasSavedRecording = true
-                        isPresented = false
+//                        hasSavedRecording = true
+//                        isPresented = false
                     }) {
                         VStack {
                             Image("saveBttn")
@@ -129,7 +129,7 @@ struct RecordingView: View {
                 recordingTime += 1
             } else {
                 stopRecording(delete: false)
-                isPresented = false
+//                isPresented = false
             }
         }
     }
