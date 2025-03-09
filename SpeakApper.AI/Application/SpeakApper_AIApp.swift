@@ -20,6 +20,14 @@ struct SpeakApper_AIApp: App {
         WindowGroup {
             
             MainView(dependencies: dependencies)
+
+    let coordinator = Coordinator()
+    
+    var body: some Scene {
+        WindowGroup {
+            CoordinatorView(coordinator: coordinator,
+                            dependencies: dependencies)
+
         }
     }
 }
