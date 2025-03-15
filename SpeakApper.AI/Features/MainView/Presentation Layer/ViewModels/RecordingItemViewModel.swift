@@ -8,19 +8,23 @@
 import Foundation
 
 final class RecordingItemViewModel {
+    let model: Recording
+    
     var title: String {
         "Добро пожаловать в SpeakerApp"
     }
     
     var date: String {
-        "Только что"
+        model.formattedDate
     }
     
     var duration: String {
-        "1:32"
+        "\(model.sequence)"
     }
     
-    init() {}
+    init(model: Recording) {
+        self.model = model
+    }
 }
 
 extension RecordingItemViewModel: Hashable {

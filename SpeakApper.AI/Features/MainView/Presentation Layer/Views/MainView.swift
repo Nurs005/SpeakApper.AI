@@ -6,15 +6,10 @@
 //
 
 import SwiftUI
-import AVFoundation
 
 struct MainView: View {
-    @ObservedObject var viewModel: MainViewModel
+    @Bindable var viewModel: MainViewModel
     @Environment(Coordinator.self) var coordinator
-    
-    @StateObject private var recordingViewModel = RecordingViewModel()
-    @State private var isRecordingPresented = false
-    @State private var hasSavedRecording = false
     
     var body: some View {
         contentBodyView
@@ -23,27 +18,29 @@ struct MainView: View {
 
 fileprivate extension MainView {
     var contentBodyView: some View {
-        ZStack {
+        VStack(spacing: 16) {
+            headerView
+            
+            scrollableView
+            
+            Spacer()
+        }
+        .overlay(alignment: .bottom) {
+            VStack(spacing: 38) {
+                if !viewModel.hasRecordings {
+                    recordingTipView
+                }
+                
+                startRecordingButtonView
+            }
+            .padding(.bottom, 30)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .background(
             Color(.background)
                 .ignoresSafeArea()
-            
-            VStack(spacing: 16) {
-                headerView
-                
-                scrollableView
-                
-                Spacer()
-            }
-            .overlay(alignment: .bottom) {
-                VStack(spacing: 38) {
-                    recordingTipView
-                    
-                    startRecordingButtonView
-                }
-                .padding(.bottom, 30)
-            }
-            .padding(.horizontal, 16)
-        }
+        )
     }
 
     var headerView: some View {
@@ -69,7 +66,9 @@ fileprivate extension MainView {
             VStack(spacing: 16) {
                 searchBarView
                 
-                buyPremiumView
+                if !viewModel.hasSubscription {
+                    buyPremiumView
+                }
                 
                 quickActionsView
                     .padding(.vertical, 16)
@@ -169,66 +168,5 @@ fileprivate extension MainView {
     
     var startRecordingButtonTipView: some View {
         Image(.startRecordingButtonTip)
-    }
-
-    var recordingsListView: some View {
-        List {
-            ForEach(recordingViewModel.filteredRecordings()) { recording in
-                NavigationLink(destination: RecordingDetailView(recording: recording)) {
-                    recordingRow(for: recording)
-                }
-                .listRowBackground(Color("BackgroundColor"))
-            }
-            .onDelete(perform: deleteRecording)
-        }
-        .listStyle(PlainListStyle())
-        .background(Color("BackgroundColor").ignoresSafeArea())
-    }
-
-    func deleteRecording(at offsets: IndexSet) {
-        offsets.forEach { index in
-            let recording = recordingViewModel.filteredRecordings()[index]
-            recordingViewModel.deleteRecording(recording)
-        }
-    }
-
-    func recordingRow(for recording: Recording) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(recordingViewModel.transcriptions[recording.url]?.components(separatedBy: " ").prefix(4).joined(separator: " ") ?? "Новая запись")
-                    .font(.headline)
-                    .foregroundColor(.white)
-
-                HStack(spacing: 8) {
-                    Text(recording.formattedDate)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-
-                    Image(systemName: "clock")
-                        .foregroundColor(.gray)
-                        .font(.subheadline)
-
-                    Text(getAudioDuration(for: recording))
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-            }
-
-            Spacer()
-        }
-        .frame(height: 28)
-        .padding()
-        .background(Color("BackgroundColor"))
-    }
-
-    func getAudioDuration(for recording: Recording) -> String {
-        let asset = AVURLAsset(url: recording.url)
-        let duration = asset.duration
-        let durationInSeconds = CMTimeGetSeconds(duration)
-
-        let minutes = Int(durationInSeconds) / 60
-        let seconds = Int(durationInSeconds) % 60
-
-        return String(format: "%02d:%02d", minutes, seconds)
     }
 }

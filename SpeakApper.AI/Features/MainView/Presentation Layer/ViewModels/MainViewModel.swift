@@ -9,17 +9,26 @@ import Foundation
 import Combine
 
 typealias MainDependencies =
-    HasRecordingRepository
+    HasRecordingUseCase
 
-final class MainViewModel: ObservableObject {
-    private let dependencies: MainDependencies
+@Observable
+final class MainViewModel {
+    @ObservationIgnored private let recordingUseCase: RecordingUseCaseProtocol
+    @ObservationIgnored private(set) var recordingItemsViewModels: [RecordingItemViewModel] = []
     
-    @Published var searchText: String = ""
-    private(set) var recordingItemsViewModels: [RecordingItemViewModel] = []
+    var searchText: String = ""
+    
+    var hasRecordings: Bool {
+        !recordingItemsViewModels.isEmpty
+    }
+    
+    var hasSubscription: Bool {
+        false
+    }
     
     init(dependencies: MainDependencies) {
-        self.dependencies = dependencies
+        self.recordingUseCase = dependencies.recordingUseCase
         
-        recordingItemsViewModels = [RecordingItemViewModel()]
+        recordingItemsViewModels = [RecordingItemViewModel(model: .init(url: URL(string: "https://www.youtube.com")!, date: Date(), sequence: 23, transcription: nil))]
     }
 }

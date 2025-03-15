@@ -7,18 +7,19 @@
 
 import Foundation
 
-protocol HasRecordingRepository {
-    var recordingRepository: RecordingRepositoryInterface { get }
+protocol HasRecordingUseCase {
+    var recordingUseCase: RecordingUseCaseProtocol { get }
 }
 
 final class Dependencies:
-    HasRecordingRepository {
+    HasRecordingUseCase {
     private let network: Networking
-    var recordingRepository: any RecordingRepositoryInterface
+    var recordingUseCase: any RecordingUseCaseProtocol
     
     init() {
         self.network = Network()
-        recordingRepository = RecordingRepository(localDataSource: RecordingLocalDataSource())
+        let recordingRepository = RecordingRepository(localDataSource: RecordingLocalDataSource())
+        recordingUseCase = RecordingUseCase(repository: recordingRepository)
     }
 }
 

@@ -16,7 +16,7 @@ struct QuickActionView: View {
             
             titleView
         }
-        .frame(width: 70)
+        .frame(maxWidth: .infinity)
     }
     
     private var iconView: some View {
