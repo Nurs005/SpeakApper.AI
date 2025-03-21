@@ -6,17 +6,22 @@
 //
 
 import SwiftUI
+import AuthenticationServices
+import Firebase
+import FirebaseAuth
+import CryptoKit
 
 struct LoginView: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(Coordinator.self) var coordinator
+    @ObservedObject var authViewModel: AuthViewModel
     @State private var email: String = ""
-    @StateObject private var authViewModel = AuthViewModel()
+    @State private var errorMessage: String = ""
+    @State private var showAlert: Bool = false
+    @State private var isLoading: Bool = false
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                contentBodyView
-            }
+        VStack {
+            contentBodyView
         }
     }
 }
@@ -30,10 +35,13 @@ fileprivate extension LoginView {
                 title
                 subtitle
                 emailField
-             //   continueButton
+                continueButton
                 separator
                 appleSignInButton
                 Spacer()
+            }
+            .alert(errorMessage, isPresented: $showAlert) {
+                Button("OK", role: .cancel) {}
             }
             .padding(.horizontal)
         }
@@ -41,21 +49,23 @@ fileprivate extension LoginView {
     }
     
     var backButton: some View {
-        Button(action: { dismiss() }) {
-            HStack { Image(systemName: "chevron.left") }
-                .foregroundColor(.white)
-                .font(.system(size: 24))
+        Button(action: { coordinator.pop() }) {
+            HStack {
+                Image(systemName: "chevron.left")
+            }
+            .foregroundColor(.white)
+            .font(.system(size: 24))
         }
         .padding(.top, 10)
     }
-    
+
     var title: some View {
         Text("Войдите в SpeakApper")
             .font(.system(size: 21).weight(.bold))
             .foregroundColor(.white)
             .padding(.top, 16)
     }
-    
+
     var subtitle: some View {
         Text("Храните файлы в безопасности и синхронизируйте их на всех устройствах")
             .font(.system(size: 16))
@@ -63,7 +73,7 @@ fileprivate extension LoginView {
             .foregroundColor(.gray)
             .padding(.bottom, 16)
     }
-    
+
     var emailField: some View {
         TextField("", text: $email, prompt: Text("Ваш адрес эл. почты").foregroundColor(.white))
             .padding()
@@ -74,30 +84,30 @@ fileprivate extension LoginView {
             .foregroundStyle(.white)
             .padding(.bottom, 16)
     }
-    
-//    var continueButton: some View {
-//        NavigationLink(destination: NavigationDestination.authCode(email: email)) {
-//            Text("Продолжить")
-//                .font(.headline)
-//                .foregroundColor(.white)
-//                .frame(maxWidth: .infinity)
-//                .padding()
-//                .background(Color("ButtonColor"))
-//                .cornerRadius(10)
-//        }
-//        .simultaneousGesture(TapGesture().onEnded {
-//            guard !email.isEmpty else { return }
-//            authViewModel.email = email
-//            Task {
-//                await authViewModel.sendOTP(to: email)
-//            }
-//        })
-//        .disabled(email.isEmpty)
-//        .opacity(email.isEmpty ? 0.5 : 1.0)
-//    }
 
-    
-    
+    var continueButton: some View {
+        Button(action: {
+            guard !email.isEmpty else { return }
+            
+            Task {
+                if await authViewModel.sendOTP(to: email) {
+                    authViewModel.email = email
+                    coordinator.push(.authCode(email: email))
+                }
+            }
+        }) {
+            Text("Продолжить")
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color("ButtonColor"))
+                .cornerRadius(10)
+        }
+        .disabled(email.isEmpty)
+        .opacity(email.isEmpty ? 0.5 : 1.0)
+    }
+
     var separator: some View {
         HStack {
             Rectangle()
@@ -112,22 +122,19 @@ fileprivate extension LoginView {
         }
         .padding(.vertical, 16)
     }
-    
+
     var appleSignInButton: some View {
-        Button(action: {
-            // Действие при нажатии через Apple ID
-        }) {
-            HStack {
-                Image(systemName: "applelogo")
-                    .font(.headline)
-                Text("Продолжить с Apple")
-                    .font(.headline)
-            }
-            .foregroundColor(.black)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.white)
-            .cornerRadius(10)
-        }
-    }
-}
+          SignInWithAppleButton(.signIn) { request in
+              authViewModel.signInWithApple(request: request)
+          } onCompletion: { result in
+              Task {
+                  await authViewModel.handleAppleSignIn(result: result)
+                  if authViewModel.isLoggedIn {
+                      coordinator.push(.main)
+                  }
+              }
+          }
+          .frame(height: 56)
+          .cornerRadius(10)
+      }
+  }

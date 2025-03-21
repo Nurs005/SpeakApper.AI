@@ -12,8 +12,9 @@ enum Sheet: String, Identifiable {
         self.rawValue
     }
     
-    case `import`
+    case importFiles
     case youtube
-    case newFeature
+    case requestFeature
     case faq
+    case sendFeedback
 }

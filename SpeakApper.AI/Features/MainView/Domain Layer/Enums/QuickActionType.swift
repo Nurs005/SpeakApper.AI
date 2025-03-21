@@ -8,47 +8,89 @@
 import Foundation
 
 enum QuickActionType: CaseIterable {
-    case `import`
+    case importFiles
     case youtube
-    case newFeature
+    case sendFeedback
+    case requestFeature
     case faq
-    
+     
     var title: String {
         switch self {
-        case .import:
-            return "Импорт записи"
-        case .youtube:
-            return "Youtube"
-        case .newFeature:
-            return "Запрос Функции"
-        case .faq:
-            return "FAQ"
+            case .importFiles:
+                return "Импортировать файлы"
+            case .youtube:
+                return "Youtube to text"
+            case .sendFeedback:
+                return "Отправить отзыв"
+            case .requestFeature:
+                return "Запросить функцию"
+            case .faq:
+                return "Вопросы и ответы"
         }
     }
+    
+    var shortTitle: String {
+        switch self {
+            case .importFiles:
+                return "Импорт записи"
+            case .youtube:
+                return "Youtube"
+            case .sendFeedback:
+                return "Отзыв"
+            case .requestFeature:
+                return "Запрос функция"
+            case .faq:
+                return "FAQ"
+        }
+    }
+    
     
     var iconName: String {
         switch self {
-        case .import:
-            return "import"
-        case .youtube:
-            return "youtube"
-        case .newFeature:
-            return "ai-idea"
-        case .faq:
-            return "faq"
+            case .importFiles:
+                return "import"
+            case .youtube:
+                return "youtube"
+            case .sendFeedback:
+                return "message-outlined"
+            case .requestFeature:
+                return "ai-idea"
+            case .faq:
+                return "faq"
         }
     }
     
-    var sheet: Sheet {
+    var category: QuickActionCategory {
         switch self {
-        case .import:
-            return .import
-        case .youtube:
-            return .youtube
-        case .newFeature:
-            return .newFeature
-        case .faq:
-            return .faq
+            case .importFiles, .youtube:
+                return .apps
+            case .sendFeedback, .requestFeature, .faq:
+                return .support
         }
     }
+    
+    
+    var sheet: Sheet {
+        switch self {
+            case .importFiles:
+                return .importFiles
+            case .youtube:
+                return .youtube
+            case .sendFeedback:
+                return .sendFeedback
+            case .requestFeature:
+                return .requestFeature
+            case .faq:
+                return .faq
+        }
+    }
+}
+
+var mainQuickActions: [QuickActionType] {
+    return [.importFiles, .youtube, .requestFeature, .faq]
+}
+
+enum QuickActionCategory {
+    case apps
+    case support
 }

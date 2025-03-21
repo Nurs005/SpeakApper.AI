@@ -8,27 +8,22 @@
 import SwiftUI
 
 struct AuthCodeView: View {
+    let email: String
     @StateObject var authViewModel: AuthViewModel
-    @Environment(\.dismiss) private var dismiss
+    @Environment(Coordinator.self) var coordinator
     
     var body: some View {
-        VStack {
-            contentBodyView
-            NavigationLink(destination: SettingsView(), isActive: $authViewModel.navigateToAccountSettings) {
-                EmptyView()
-            }
-            .hidden()
-        }
+        contentBodyView
     }
 }
 
-
-fileprivate extension AuthCodeView {
+private extension AuthCodeView {
     var contentBodyView: some View {
         ZStack {
             Color("BackgroundColor").ignoresSafeArea()
             VStack(alignment: .leading) {
                 backButton
+                    .padding(.bottom, 16)
                 title
                 subtitle
                 otpField
@@ -40,23 +35,27 @@ fileprivate extension AuthCodeView {
                 }
                 Spacer()
             }
+            .navigationBarBackButtonHidden()
             .padding(.horizontal, 16)
         }
     }
     
     var backButton: some View {
         Button(action: {
-            dismiss()
+            coordinator.push(.login)
         }) {
             HStack {
                 Image(systemName: "chevron.left")
+                Text("Назад")
             }
             .foregroundColor(.white)
-            .font(.system(size: 24))
+            .font(.system(size: 17))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, 16)
         }
-        .padding(.top, 16)
-        .padding(.bottom, 16)
+        .padding(.top, 10)
     }
+
     
     var title: some View {
         Text("Проверьте электронную почту")
@@ -66,14 +65,15 @@ fileprivate extension AuthCodeView {
     }
     
     var subtitle: some View {
-        Text("Мы отправили письмо на адрес \(authViewModel.email). Перейдите по ссылке в письме или введите код. Срок действия кода истекает через 5 минут.")
+        Text("Мы отправили письмо на адрес \(email). Перейдите по ссылке в письме или введите код. Срок действия кода истекает через 5 минут.")
             .font(.system(size: 16))
-            .foregroundColor(.gray.opacity(0.7))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .foregroundColor(.gray)
             .padding(.bottom, 16)
     }
     
     var otpField: some View {
-        TextField("Код авторизации", text: $authViewModel.otpCode)
+        TextField("", text: $authViewModel.otpCode, prompt: Text("Код авторизации").foregroundColor(.white))
             .keyboardType(.numberPad)
             .padding()
             .background(RoundedRectangle(cornerRadius: 10).stroke(Color.gray.opacity(0.5)))
@@ -81,11 +81,14 @@ fileprivate extension AuthCodeView {
             .padding(.bottom, 16)
     }
     
-    
     var continueButton: some View {
         Button(action: {
             Task {
-                await authViewModel.verifyOTP(email: authViewModel.email, code: authViewModel.otpCode)
+                let success = await authViewModel.verifyOTP(email: email, code: authViewModel.otpCode)
+                if success {
+                    coordinator.popToRoot()
+                    coordinator.push(.settings)
+                }
             }
         }) {
             Text("Продолжить")
@@ -100,7 +103,3 @@ fileprivate extension AuthCodeView {
         .opacity(authViewModel.otpCode.isEmpty ? 0.5 : 1.0)
     }
 }
-
-
-
-

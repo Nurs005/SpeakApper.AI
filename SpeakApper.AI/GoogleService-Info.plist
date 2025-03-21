@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>marlmyn.SpeakApper-AI</string>
+	<string>app.speakapper.spk</string>
 	<key>PROJECT_ID</key>
 	<string>speakapper</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:671660046427:ios:f8f26b077815dcc5eee77e</string>
+	<string>1:671660046427:ios:79ed33280847cca0eee77e</string>
 </dict>
 </plist>

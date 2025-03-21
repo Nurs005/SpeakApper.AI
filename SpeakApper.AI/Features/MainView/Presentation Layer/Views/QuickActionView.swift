@@ -9,27 +9,48 @@ import SwiftUI
 
 struct QuickActionView: View {
     let actionType: QuickActionType
-    
+    let useShortTitle: Bool
+    let isHorizontal: Bool
+    let actionHandler: (QuickActionType) -> Void
+
     var body: some View {
-        VStack(spacing: 8) {
-            iconView
-            
-            titleView
-        }
-        .frame(width: 70)
+        content
+            .onTapGesture { actionHandler(actionType) }
     }
     
+    @ViewBuilder
+    private var content: some View {
+        if isHorizontal {
+            VStack(spacing: 8) {
+                iconView
+                titleView
+            }
+            .frame(width: 70)
+        } else {
+            HStack {
+                iconView
+                titleView
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
+            }
+            .padding(.vertical, 6)
+            .background(Color("listColor"))
+            .cornerRadius(10)
+        }
+    }
+
     private var iconView: some View {
         Image(actionType.iconName)
             .resizable()
             .frame(width: 24, height: 24)
     }
-    
+
     private var titleView: some View {
-        Text(actionType.title)
+        Text(useShortTitle ? actionType.shortTitle : actionType.title)
             .font(.system(size: 14))
             .foregroundColor(.white)
             .multilineTextAlignment(.center)
-            .lineLimit(2, reservesSpace: true)
+            .lineLimit(2)
     }
 }

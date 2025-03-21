@@ -8,30 +8,29 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @StateObject private var authViewModel = AuthViewModel()
-    @State private var navigateToLogin = false
-    @State private var showAccountSettings = false
-    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: SettingsViewModel
+    @Environment(Coordinator.self) var coordinator
     
     var body: some View {
-        contentBodyView
-    }
-}
-
-fileprivate extension SettingsView {
-    var contentBodyView: some View {
         ZStack {
-            Color(.background).ignoresSafeArea()
+            Color("BackgroundColor").ignoresSafeArea()
             VStack(spacing: 16) {
                 backButton
                 scrollableView
             }
+            .navigationBarBackButtonHidden()
         }
     }
-    
+}
+
+fileprivate extension SettingsView {
     var backButton: some View {
         Button(action: {
-            dismiss()
+            if coordinator.path.count == 1 {
+                coordinator.popToRoot() 
+            } else {
+                coordinator.pop()
+            }
         }) {
             HStack {
                 Image(systemName: "chevron.left")
@@ -61,34 +60,31 @@ fileprivate extension SettingsView {
             .padding(.leading, 16)
     }
     
-    @ViewBuilder
-    var accountButtonDestination: some View {
-        if authViewModel.isLoggedIn {
-            AccountSettingsView()
-        } else {
-            LoginView()
-        }
-    }
-
     var accountButton: some View {
+        Button(action: {
+            if viewModel.isLoggedIn {
+                coordinator.push(.account)
+            } else {
+                coordinator.push(.login)
+                print("User is logged in: \(viewModel.isLoggedIn)")
+            }
+        }) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(authViewModel.email.isEmpty ? "Гость" : authViewModel.email)
+                    Text(viewModel.email.isEmpty ? "Гость" : viewModel.email)
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundColor(.white)
                     Text("Ваш аккаунт")
                         .font(.system(size: 14))
-                        .foregroundStyle(.gray)
+                        .foregroundColor(.gray)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundStyle(.gray)
+                    .foregroundColor(.gray)
             }
-      
+        }
         .padding(.horizontal, 16)
     }
-
-
     
     var settingsForm: some View {
         Form {
@@ -98,20 +94,21 @@ fileprivate extension SettingsView {
         }
         .scrollContentBackground(.hidden)
         .background(Color("BackgroundColor"))
-        .foregroundStyle(.white)
-        .navigationBarBackButtonHidden(true)
+        .foregroundColor(.white)
     }
     
     var appSection: some View {
         Section(header: Text("Приложение").textCase(nil).foregroundColor(.gray)) {
-            NavigationLink(value: NavigationDestination.import) {
-                SectionView(iconName: "uil_import", title: "Импортировать файлы")
-            }
-            NavigationLink(value: NavigationDestination.youtube) {
-                SectionView(iconName: "iconoir_youtube", title: "Youtube to text")
-            }
-            NavigationLink(value: NavigationDestination.newFeature) {
-                SectionView(iconName: "share-line", title: "Поделиться с другом")
+            VStack(spacing: 8) {
+                ForEach(QuickActionType.allCases.filter { $0.category == .apps }, id: \.self) { action in
+                    QuickActionView(
+                        actionType: action,
+                        useShortTitle: false,
+                        isHorizontal: false
+                    ) { selectedAction in
+                        coordinator.presentSheet(selectedAction.sheet)
+                    }
+                }
             }
         }
         .listRowBackground(Color("listColor"))
@@ -119,14 +116,16 @@ fileprivate extension SettingsView {
     
     var supportSection: some View {
         Section(header: Text("Поддержка и обратная связь").textCase(nil).foregroundColor(.gray)) {
-            NavigationLink(value: NavigationDestination.faq) {
-                SectionView(iconName: "mingcute_question-line", title: "Вопросы и ответы")
-            }
-            NavigationLink(value: NavigationDestination.newFeature) {
-                SectionView(iconName: "hugeicons_ai-idea", title: "Запросить функцию")
-            }
-            NavigationLink(value: NavigationDestination.import) {
-                SectionView(iconName: "message-outlined", title: "Отправить отзыв")
+            VStack(spacing: 8) {
+                ForEach(QuickActionType.allCases.filter { $0.category == .support }, id: \.self) { action in
+                    QuickActionView(
+                        actionType: action,
+                        useShortTitle: false,
+                        isHorizontal: false  
+                    ) { selectedAction in
+                        coordinator.presentSheet(selectedAction.sheet)
+                    }
+                }
             }
         }
         .listRowBackground(Color("listColor"))
@@ -135,13 +134,13 @@ fileprivate extension SettingsView {
     var dataManagementSection: some View {
         Section(header: Text("Управление данными").textCase(nil).foregroundColor(.gray)) {
             Button(action: {
-                // Удаление записей
+                // TODO: Реализовать логику удаления записей
             }) {
                 HStack(spacing: 16) {
-                    Image("delete-outline-rounded")
+                    Image(systemName: "trash")
                         .resizable()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(.red)
+                        .foregroundColor(.white)
                     Text("Удалить все записи")
                         .foregroundColor(.white)
                     Spacer()
@@ -152,4 +151,5 @@ fileprivate extension SettingsView {
         }
         .listRowBackground(Color("listColor"))
     }
+    
 }

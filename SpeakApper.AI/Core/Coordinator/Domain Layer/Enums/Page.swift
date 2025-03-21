@@ -12,4 +12,7 @@ enum Page: Hashable {
     case main
     case recording
     case settings
+    case account
+    case login
+    case authCode(email: String)
 }

@@ -32,36 +32,45 @@ fileprivate extension CoordinatorView {
     @ViewBuilder
     func buildPage(_ page: Page) -> some View {
         switch page {
-        case .onboarding:
-            buildOnboardingPage()
-        case .main:
-            buildMainPage()
-        case .recording:
-            buildRecordingPage()
-        case .settings:
-            buildSettingsPage()
+            case .onboarding:
+                buildOnboardingPage()
+            case .main:
+                buildMainPage()
+            case .recording:
+                buildRecordingPage()
+            case .settings:
+                buildSettingsPage()
+            case .account:
+                buildAccountPage()
+            case .login:
+                buildLoginPage()
+            case .authCode(let email):
+                    buildAuthCodePage(email: email)
         }
     }
     
     @ViewBuilder
     func buildSheet(_ sheet: Sheet) -> some View {
         switch sheet {
-        case .import:
-            buildImportSheet()
-        case .youtube:
-            buildYoutubeSheet()
-        case .newFeature:
-            buildNewFeatureSheet()
-        case .faq:
-            buildFAQSheet()
+            case .importFiles:
+                buildImportSheet()
+            case .youtube:
+                buildYoutubeSheet()
+            case .requestFeature:
+                buildNewFeatureSheet()
+            case .faq:
+                buildFAQSheet()
+            case .sendFeedback:
+                buildSendFeedbackSheet()
+                
         }
     }
     
     @ViewBuilder
     func buildFullCover(_ cover: FullScreenCover) -> some View {
         switch cover {
-        case .paywall:
-            buildPaywallCover()
+            case .paywall:
+                buildPaywallCover()
         }
     }
 }
@@ -87,8 +96,24 @@ fileprivate extension CoordinatorView {
     }
     
     func buildSettingsPage() -> some View {
-        return SettingsView()
+        let viewModel = SettingsViewModel(authViewModel: AuthViewModel())
+        
+        return SettingsView(viewModel: viewModel)
     }
+    
+    func buildAccountPage() -> some View {
+        return AccountSettingsView()
+    }
+    func buildLoginPage() -> some View {
+        let authViewModel = AuthViewModel()
+        return LoginView(authViewModel: authViewModel)
+    }
+
+    func buildAuthCodePage(email: String) -> some View {
+        let authViewModel = AuthViewModel() 
+        return AuthCodeView(email: email, authViewModel: authViewModel)
+    }
+    
 }
 
 // MARK: Sheets
@@ -107,6 +132,10 @@ fileprivate extension CoordinatorView {
     
     func buildFAQSheet() -> some View {
         return FAQView()
+    }
+    
+    func buildSendFeedbackSheet() -> some View {
+        return SendFeedbackView() 
     }
 }
 

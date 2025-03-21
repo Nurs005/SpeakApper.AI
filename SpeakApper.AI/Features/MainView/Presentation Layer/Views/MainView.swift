@@ -115,11 +115,14 @@ fileprivate extension MainView {
     
     var quickActionsView: some View {
         HStack(alignment: .top, spacing: 27) {
-            ForEach(QuickActionType.allCases, id: \.self) { actionType in
-                QuickActionView(actionType: actionType)
-                    .onTapGesture {
-                        coordinator.presentSheet(actionType.sheet)
-                    }
+            ForEach(mainQuickActions, id: \.self) { action in
+                QuickActionView(
+                    actionType: action,
+                    useShortTitle: true,
+                    isHorizontal: true
+                ) { selectedAction in
+                    coordinator.presentSheet(selectedAction.sheet)
+                }
             }
         }
     }
