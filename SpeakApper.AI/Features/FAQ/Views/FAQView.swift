@@ -9,16 +9,9 @@ import SwiftUI
 
 struct FAQView: View {
     @Environment(Coordinator.self) var coordinator
+    @StateObject private var viewModel = FAQViewModel()
     @State private var expandedQuestion: Int? = nil
-    
-    let faqData = [
-        "Find answers to frequently asked que",
-        "Find answers to frequently asked que",
-        "Find answers to frequently asked que",
-        "Find answers to frequently asked que",
-        "Find answers to frequently asked que"
-    ]
-    
+
     var body: some View {
         VStack(spacing: 16) {
             headerView
@@ -91,23 +84,23 @@ fileprivate extension FAQView {
     var faqListView: some View {
         ScrollView {
             VStack(spacing: 16) {
-                ForEach(faqData.indices, id: \.self) { index in
-                    faqItem(question: faqData[index], index: index)
+                ForEach(viewModel.items.indices, id: \.self) { index in
+                    faqItem(item: viewModel.items[index], index: index)
                 }
             }
             .padding(.top, 8)
         }
     }
-    
-    func faqItem(question: String, index: Int) -> some View {
+
+    func faqItem(item: FAQItem, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(question)
+                Text(item.title)
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     withAnimation {
                         expandedQuestion = (expandedQuestion == index ? nil : index)
@@ -118,9 +111,9 @@ fileprivate extension FAQView {
                 }
             }
             .padding()
-            
+
             if expandedQuestion == index {
-                Text("\(question) \(question) \(question) \(question) \(question)")
+                Text(item.subtitle)
                     .font(.system(size: 16))
                     .foregroundColor(.white.opacity(0.8))
                     .padding([.horizontal, .bottom])
@@ -131,4 +124,5 @@ fileprivate extension FAQView {
         .background(Color(hex: "#2F2F37"))
         .cornerRadius(12)
     }
+
 }

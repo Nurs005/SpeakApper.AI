@@ -13,7 +13,7 @@ enum QuickActionType: CaseIterable {
     case sendFeedback
     case requestFeature
     case faq
-     
+    
     var title: String {
         switch self {
             case .importFiles:

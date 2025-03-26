@@ -27,7 +27,7 @@ fileprivate extension SettingsView {
     var backButton: some View {
         Button(action: {
             if coordinator.path.count == 1 {
-                coordinator.popToRoot() 
+                coordinator.popToRoot()
             } else {
                 coordinator.pop()
             }
@@ -104,7 +104,8 @@ fileprivate extension SettingsView {
                     QuickActionView(
                         actionType: action,
                         useShortTitle: false,
-                        isHorizontal: false
+                        isHorizontal: false,
+                        iconColor: .white
                     ) { selectedAction in
                         coordinator.presentSheet(selectedAction.sheet)
                     }
@@ -121,7 +122,8 @@ fileprivate extension SettingsView {
                     QuickActionView(
                         actionType: action,
                         useShortTitle: false,
-                        isHorizontal: false  
+                        isHorizontal: false,
+                        iconColor: .white
                     ) { selectedAction in
                         coordinator.presentSheet(selectedAction.sheet)
                     }

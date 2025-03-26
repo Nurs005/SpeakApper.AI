@@ -11,8 +11,9 @@ struct QuickActionView: View {
     let actionType: QuickActionType
     let useShortTitle: Bool
     let isHorizontal: Bool
+    let iconColor: Color
     let actionHandler: (QuickActionType) -> Void
-
+    
     var body: some View {
         content
             .onTapGesture { actionHandler(actionType) }
@@ -39,13 +40,15 @@ struct QuickActionView: View {
             .cornerRadius(10)
         }
     }
-
+    
     private var iconView: some View {
         Image(actionType.iconName)
+            .renderingMode(.template)
             .resizable()
             .frame(width: 24, height: 24)
+            .foregroundColor(iconColor)
     }
-
+    
     private var titleView: some View {
         Text(useShortTitle ? actionType.shortTitle : actionType.title)
             .font(.system(size: 14))

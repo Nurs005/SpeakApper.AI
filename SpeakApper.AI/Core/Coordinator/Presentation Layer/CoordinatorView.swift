@@ -45,7 +45,7 @@ fileprivate extension CoordinatorView {
             case .login:
                 buildLoginPage()
             case .authCode(let email):
-                    buildAuthCodePage(email: email)
+                buildAuthCodePage(email: email)
         }
     }
     
@@ -108,9 +108,9 @@ fileprivate extension CoordinatorView {
         let authViewModel = AuthViewModel()
         return LoginView(authViewModel: authViewModel)
     }
-
+    
     func buildAuthCodePage(email: String) -> some View {
-        let authViewModel = AuthViewModel() 
+        let authViewModel = AuthViewModel()
         return AuthCodeView(email: email, authViewModel: authViewModel)
     }
     
@@ -135,7 +135,8 @@ fileprivate extension CoordinatorView {
     }
     
     func buildSendFeedbackSheet() -> some View {
-        return SendFeedbackView() 
+        return SendFeedbackView()
+            .presentationDragIndicator(.hidden)
     }
 }
 
