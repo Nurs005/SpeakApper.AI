@@ -48,7 +48,7 @@ fileprivate extension MainView {
     
     var headerView: some View {
         HStack(spacing: 0) {
-            Text("SpeakerApp")
+            Text("SpeakApper")
                 .font(.system(size: 21, weight: .bold))
                 .foregroundColor(.white)
             

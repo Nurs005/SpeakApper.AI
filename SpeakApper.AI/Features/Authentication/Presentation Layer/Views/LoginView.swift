@@ -134,6 +134,7 @@ fileprivate extension LoginView {
                   }
               }
           }
+          .signInWithAppleButtonStyle(.white)
           .frame(height: 56)
           .cornerRadius(10)
       }

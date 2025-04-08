@@ -8,35 +8,41 @@
 import SwiftUI
 import MessageUI
 
-struct MailView: UIViewControllerRepresentable {
-    @Environment(\.presentationMode) var presentation
+struct SendMailView: UIViewControllerRepresentable {
+    var recipients: [String]
     var subject: String
     var messageBody: String
-    var recipients: [String]?
+    var isHTML: Bool = false
+    
+    @Environment(\.presentationMode) var presentationMode
 
     class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
-        var parent: MailView
+        @Binding var presentation: PresentationMode
 
-        init(_ parent: MailView) {
-            self.parent = parent
+        init(presentation: Binding<PresentationMode>) {
+            _presentation = presentation
         }
 
-        func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-            controller.dismiss(animated: true)
+        func mailComposeController(
+            _ controller: MFMailComposeViewController,
+            didFinishWith result: MFMailComposeResult,
+            error: Error?
+        ) {
+            $presentation.wrappedValue.dismiss()
         }
     }
 
     func makeCoordinator() -> Coordinator {
-        return Coordinator(self)
+        Coordinator(presentation: presentationMode)
     }
 
     func makeUIViewController(context: Context) -> MFMailComposeViewController {
-        let mailVC = MFMailComposeViewController()
-        mailVC.mailComposeDelegate = context.coordinator
-        mailVC.setToRecipients(recipients)
-        mailVC.setSubject(subject)
-        mailVC.setMessageBody(messageBody, isHTML: false)
-        return mailVC
+        let vc = MFMailComposeViewController()
+        vc.setToRecipients(recipients)
+        vc.setSubject(subject)
+        vc.setMessageBody(messageBody, isHTML: isHTML)
+        vc.mailComposeDelegate = context.coordinator
+        return vc
     }
 
     func updateUIViewController(_ uiViewController: MFMailComposeViewController, context: Context) {}

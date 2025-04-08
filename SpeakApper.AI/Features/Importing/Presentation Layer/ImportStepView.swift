@@ -13,12 +13,16 @@ struct ImportStepView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Image(step.imageName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 297, height: 255)
-                .cornerRadius(12)
-                .padding(.top, 10)
+            HStack {
+                Spacer()
+                Image(step.imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 297, height: 255)
+                    .cornerRadius(12)
+                Spacer()
+            }
+            .padding(.top, 10)
 
             Text(step.title)
                 .font(.system(size: 17, weight: .bold))
@@ -29,9 +33,10 @@ struct ImportStepView: View {
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)
         }
-        .frame(width: 361, height: 354)
+        //.frame(width: 361, height: 354)
         .padding()
         .background(Color(hex: "#2C2C2C").opacity(0.8))
         .cornerRadius(12)
+        .frame(maxWidth: .infinity)
     }
 }

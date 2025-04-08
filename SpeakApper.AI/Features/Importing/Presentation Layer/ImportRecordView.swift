@@ -21,13 +21,12 @@ struct ImportRecordView: View {
                 VStack(spacing: 16) {
                     ForEach(selectedTab.steps, id: \.self) { step in
                         ImportStepView(step: step)
+                            .padding(.horizontal, 16)
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 14)
             }
         }
-        .background(Color.black.edgesIgnoringSafeArea(.all))
+        .background(Color(hex: "#1B1A1A").edgesIgnoringSafeArea(.all))
     }
     
     // Заголовок
@@ -55,18 +54,17 @@ struct ImportRecordView: View {
                     .padding(.leading, 16)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
+            //.padding(.horizontal, 16)
         }
     }
     
     // Таб-бар
     private var tabBarView: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedCorners(radius: 30, corners: [.topLeft, .topRight])
                 .fill(Color(hex: "#303030"))
                 .frame(height: 46)
                 .frame(maxWidth: .infinity)
-                .cornerRadius(12, corners: [.topLeft, .topRight])
             
             HStack(spacing: 0) {
                 ForEach(ImportType.allCases, id: \.self) { type in
@@ -77,7 +75,7 @@ struct ImportRecordView: View {
                     }) {
                         VStack(spacing: 4) {
                             Text(type.title)
-                                .font(.system(size: 16, weight: selectedTab == type ? .bold : .regular))
+                                .font(.system(size: 16))
                                 .foregroundColor(selectedTab == type ? .white.opacity(0.9) : .gray)
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
@@ -95,7 +93,9 @@ struct ImportRecordView: View {
             }
             .padding(.horizontal, 16)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 4)
         .padding(.top, 4)
     }
 }
+
+

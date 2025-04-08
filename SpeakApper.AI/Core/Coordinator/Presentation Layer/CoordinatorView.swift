@@ -62,7 +62,10 @@ fileprivate extension CoordinatorView {
                 buildFAQSheet()
             case .sendFeedback:
                 buildSendFeedbackSheet()
-                
+            case .customFeedback:
+                buildCustomFeedbackSheet()   
+            case .deleteSurveys:
+                buildDeleteSurveysSheet()
         }
     }
     
@@ -135,8 +138,17 @@ fileprivate extension CoordinatorView {
     }
     
     func buildSendFeedbackSheet() -> some View {
-        return SendFeedbackView()
+        let viewModel = SettingsViewModel(authViewModel: AuthViewModel())
+        return SendFeedbackView(viewModel: viewModel)
             .presentationDragIndicator(.hidden)
+    }
+    
+    func buildCustomFeedbackSheet() -> some View {
+        return CustomDeleteReasonView()
+    }
+    
+    func buildDeleteSurveysSheet() -> some View {
+        return DeleteAccountSurveyView()
     }
 }
 

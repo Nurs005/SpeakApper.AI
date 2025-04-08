@@ -63,14 +63,14 @@ fileprivate extension YoutubeView {
         Text("Вы можете аудио из YouTube видео преобразовать в текст. Для этого вставьте ссылку ниже")
             .font(.system(size: 16))
             .foregroundColor(.white.opacity(0.7))
-            .multilineTextAlignment(.leading)
+            //.multilineTextAlignment(.leading)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     var urlInputField: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.1))
+                .fill(Color(hex: "#333333"))
             
             HStack {
                 TextField("", text: $videoURL, prompt: Text("URL видео").foregroundColor(.gray))
@@ -93,7 +93,7 @@ fileprivate extension YoutubeView {
 
     var transcriptionButton: some View {
         Button(action: {
-            // Действие по обработке ссылки
+            // Действие 
         }) {
             Text("Транскрибировать")
                 .font(.system(size: 17, weight: .semibold))

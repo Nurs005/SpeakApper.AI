@@ -6,33 +6,24 @@
 //
 
 import Foundation
-import SwiftUI
 import FirebaseAuth
-import Combine
 
 @MainActor
 class SettingsViewModel: ObservableObject {
-    @Published var isLoggedIn: Bool
-    @Published var email: String
-
+    @Published var email: String = "Гость"
+    @Published var isLoggedIn: Bool = false
+    
     private let authViewModel: AuthViewModel
-    private var cancellables = Set<AnyCancellable>()
-
+    
     init(authViewModel: AuthViewModel) {
         self.authViewModel = authViewModel
-        self.isLoggedIn = authViewModel.isLoggedIn
         self.email = authViewModel.email
-
-        authViewModel.$isLoggedIn
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newValue in
-                self?.isLoggedIn = newValue
-                self?.email = self?.authViewModel.email ?? "Гость"
-            }
-            .store(in: &cancellables)
+        self.isLoggedIn = authViewModel.isLoggedIn
     }
-
+    
     func logout() {
         authViewModel.signOut()
+        self.email = "Гость"
+        self.isLoggedIn = false
     }
 }

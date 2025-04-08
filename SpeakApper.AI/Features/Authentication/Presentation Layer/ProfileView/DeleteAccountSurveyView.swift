@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct DeleteAccountSurveyView: View {
-    @Environment(\.presentationMode) var presentationMode
-    @StateObject private var authViewModel = AuthViewModel()
+    @Environment(Coordinator.self) var coordinator
+    @ObservedObject private var authViewModel = AuthViewModel.shared
     @State private var selectedReason: String? = nil
     @State private var showFinalAlert = false
-
+    
     let reasons = [
         "Возникли проблемы с оплатой",
         "Ненадежный или глючный",
@@ -25,53 +25,63 @@ struct DeleteAccountSurveyView: View {
     ]
     
     var body: some View {
-        VStack {
-            closeButton
-            titleView
-            reasonListView
-            continueButton
+        ZStack {
+            Color("BackgroundColor").ignoresSafeArea()
+            
+            VStack {
+                closeButton
+                titleView
+                reasonListView
+                continueButton
+            }
+            
+            if showFinalAlert {
+                customFinalAlert()
+            }
         }
-        .background(Color("BackgroundColor").ignoresSafeArea())
-        .overlay(showFinalAlert ? customFinalAlert() : nil)
     }
 }
 
 // MARK: - UI Components
 private extension DeleteAccountSurveyView {
-    // Кнопка закрытия
     var closeButton: some View {
         HStack {
-            Button(action: { presentationMode.wrappedValue.dismiss() }) {
+            Button(action: {
+                coordinator.dismissSheet()
+            }) {
                 Image(systemName: "xmark")
                     .foregroundColor(.white)
-                    .font(.system(size: 20, weight: .bold))
+                    .frame(width: 40, height: 40)
+                    .contentShape(Rectangle())
             }
             Spacer()
         }
         .padding(.horizontal, 16)
         .padding(.top, 20)
     }
-
-    // Заголовок
+    
     var titleView: some View {
         Text("Выберите основную причину удаления вашего аккаунта")
-            .font(.system(size: 21))
+            .font(.system(size: 21, weight: .bold))
             .foregroundColor(.white)
-            .bold()
             .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.top, 10)
     }
-
-    // Список причин удаления
+    
     var reasonListView: some View {
         ScrollView {
-            VStack(spacing: 12) {
+            VStack(spacing: 4) {
                 ForEach(reasons, id: \.self) { reason in
                     HStack {
                         Text(reason)
                             .foregroundColor(.white)
+                            .font(.system(size: 16))
+                            .padding(.vertical, 12)
+                        
                         Spacer()
+                        
                         Toggle("", isOn: Binding(
                             get: { self.selectedReason == reason },
                             set: { if $0 { self.selectedReason = reason } else { self.selectedReason = nil } }
@@ -79,9 +89,8 @@ private extension DeleteAccountSurveyView {
                         .labelsHidden()
                         .toggleStyle(RadioButtonToggleStyle())
                     }
-                    .padding()
-                   // .background(Color("listColor"))
-                    .cornerRadius(10)
+                    .padding(.horizontal, 16)
+                    .contentShape(Rectangle())
                     .onTapGesture {
                         withAnimation {
                             selectedReason = reason
@@ -89,15 +98,17 @@ private extension DeleteAccountSurveyView {
                     }
                 }
             }
-            .padding(.horizontal, 16)
         }
     }
-
-    // Кнопка "Продолжить удаление"
+    
     var continueButton: some View {
         Button(action: {
-            withAnimation {
-                showFinalAlert = true
+            if selectedReason == "Другое" {
+                coordinator.presentSheet(.customFeedback)
+            } else {
+                withAnimation {
+                    showFinalAlert = true
+                }
             }
         }) {
             Text("Продолжить удаление")
@@ -114,7 +125,6 @@ private extension DeleteAccountSurveyView {
     }
 }
 
-// MARK: - Кастомный Alert
 private extension DeleteAccountSurveyView {
     func customFinalAlert() -> some View {
         VStack {
@@ -147,10 +157,9 @@ private extension DeleteAccountSurveyView {
         .transition(.opacity)
     }
     
-    // Кнопка "Связаться со службой поддержки"
     var supportButton: some View {
         Button(action: {
-            print("Связаться с поддержкой")
+            coordinator.presentSheet(.sendFeedback)
         }) {
             Text("Связаться со службой поддержки")
                 .font(.system(size: 17, weight: .medium))
@@ -163,7 +172,6 @@ private extension DeleteAccountSurveyView {
         .padding(.horizontal, 20)
     }
     
-    // Кнопка "Удалить аккаунт"
     var deleteButton: some View {
         Button(action: {
             deleteAccount()
@@ -171,34 +179,30 @@ private extension DeleteAccountSurveyView {
             Text("Удалить аккаунт")
                 .font(.system(size: 17))
                 .frame(maxWidth: .infinity)
-               // .frame(height: 50)
                 .foregroundColor(.red)
-                
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
     }
 }
 
-// MARK: - Логика удаления аккаунта
 private extension DeleteAccountSurveyView {
     func deleteAccount() {
         print("Аккаунт удалён по причине: \(selectedReason ?? "")")
         Task {
             await authViewModel.deleteAccount()
             authViewModel.isLoggedIn = false
-            presentationMode.wrappedValue.dismiss() 
+            coordinator.popToRoot()
         }
     }
 }
 
-// MARK: - Кастомный стиль для радио-кнопки
 struct RadioButtonToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         ZStack {
             Circle()
-                .stroke(configuration.isOn ? Color(hex: "#6F7CFF") : .gray, lineWidth: 3)
-                .frame(width: 24, height: 24)
+                .stroke(configuration.isOn ? Color(hex: "#6F7CFF") : .gray, lineWidth: 2)
+                .frame(width: 20, height: 20)
             
             if configuration.isOn {
                 Circle()
@@ -211,6 +215,5 @@ struct RadioButtonToggleStyle: ToggleStyle {
                 configuration.isOn.toggle()
             }
         }
-        .animation(.easeInOut, value: configuration.isOn)
     }
 }

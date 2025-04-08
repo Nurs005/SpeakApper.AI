@@ -61,29 +61,41 @@ fileprivate extension SettingsView {
     }
     
     var accountButton: some View {
-        Button(action: {
-            if viewModel.isLoggedIn {
-                coordinator.push(.account)
-            } else {
-                coordinator.push(.login)
-                print("User is logged in: \(viewModel.isLoggedIn)")
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(viewModel.email.isEmpty ? "Гость" : viewModel.email)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                Text("Ваш аккаунт")
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
             }
-        }) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(viewModel.email.isEmpty ? "Гость" : viewModel.email)
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.white)
-                    Text("Ваш аккаунт")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
-                }
-                Spacer()
+            
+            Spacer()
+            
+            if viewModel.isLoggedIn {
                 Image(systemName: "chevron.right")
                     .foregroundColor(.gray)
+            } else {
+                Button(action: {
+                    coordinator.push(.login)
+                }) {
+                    Text("Зарегистрироваться / Войти")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(.white))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color("ButtonColor"))
+                        .cornerRadius(10)
+                }
             }
         }
         .padding(.horizontal, 16)
+        .onTapGesture {
+            if viewModel.isLoggedIn {
+                coordinator.push(.account)
+            }
+        }
     }
     
     var settingsForm: some View {

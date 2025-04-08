@@ -10,145 +10,211 @@ import AVFoundation
 
 struct RecordingDetailView: View {
     let recording: Recording
+
     @ObservedObject var transcriptionManager = TranscriptionManager()
-    
-    @State private var transcriptionText: String = ""
-    @State private var isTranscribing: Bool = true
-    @State private var audioTitle: String = ""
-    @State private var audioDuration: String = ""
+    @State private var transcriptionText = ""
+    @State private var isTranscribing = true
+    @State private var audioTitle = ""
+    @State private var audioDuration = ""
     @State private var audioPlayer: AVAudioPlayer?
-    @State private var isPlaying: Bool = false
-    @State private var currentTime: TimeInterval = 0
-    @State private var timer: Timer?
-    
+    @State private var isPlaying = false
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        contentBodyView
+            .navigationBarHidden(true)
+            .onAppear {
+                startTranscription()
+                fetchAudioDuration()
+                setupAudioPlayer()
+            }
+            .onDisappear {
+                stopAudio()
+            }
+    }
+}
+
+fileprivate extension RecordingDetailView {
+
+    var contentBodyView: some View {
+        ZStack(alignment: .bottom) {
+            Color("BackgroundColor").ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                headerView
+                audioPlayerView
+
+                if isTranscribing {
+                    loadingView
+                } else if transcriptionText.isEmpty {
+                    errorView
+                } else {
+                    transcriptionScrollView
+                }
+
+                Spacer(minLength: 100)
+            }
+            .padding(.horizontal)
+
+            bottomActionsView
+        }
+    }
+
+    var headerView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button(action: {
+                // dismiss or navigation logic
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "chevron.left")
+                    Text("Назад")
+                }
+                .foregroundColor(.white)
+                .font(.system(size: 17, weight: .medium))
+            }
+
             Text(audioTitle.isEmpty ? "Аудиозапись" : audioTitle)
                 .font(.system(size: 21, weight: .bold))
                 .foregroundColor(.white)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
-            
-            HStack {
-                Button(action: togglePlayPause) {
-                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(Color("ButtonColor"))
-                }
-                
-                VStack(alignment: .leading) {
-                    Text("Аудиозапись")
-                        .foregroundColor(.white)
-                        .font(.headline)
-                    
-                    Text(audioDuration)
-                        .foregroundColor(.gray)
-                        .font(.subheadline)
-                }
-                
-                Spacer()
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 12)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    var audioPlayerView: some View {
+        HStack(spacing: 12) {
+            Button(action: togglePlayPause) {
+                Circle()
+                    .fill(Color(hex: "#7B87FF"))
+                    .frame(width: 44, height: 44)
+                    .overlay(
+                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 18, weight: .semibold))
+                    )
             }
-            .padding()
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(10)
-            
-            if isTranscribing {
-                Spacer()
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(1.5)
-                    .multilineTextAlignment(.center)
-                Text("Транскрибирование аудиозаписи...")
-                    .foregroundColor(.gray)
-                    .padding(.top, 8)
-                    .multilineTextAlignment(.center)
-                Spacer()
-            } else {
-                ScrollView {
-                    Text(transcriptionText)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.black.opacity(0.2))
-                        .cornerRadius(10)
+
+            HStack(spacing: 2) {
+                ForEach(0..<30, id: \ .self) { _ in
+                    Capsule()
+                        .fill(Color.white.opacity(0.8))
+                        .frame(width: 2, height: CGFloat.random(in: 10...22))
                 }
-                .padding(.horizontal)
             }
-            
+
             Spacer()
-            
-            HStack(spacing: 20) {
-                Button(action: {
-                    // Действие для кнопки AI
-                }) {
+
+            Text(audioDuration)
+                .foregroundColor(Color.white.opacity(0.5))
+                .font(.subheadline)
+        }
+        .padding()
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(12)
+    }
+
+    var loadingView: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "#7B87FF")))
+                .scaleEffect(1.4)
+            Text("Транскрибирование аудиозаписи")
+                .foregroundColor(.gray)
+                .font(.system(size: 15))
+            Spacer()
+        }
+    }
+
+    var errorView: some View {
+        VStack(spacing: 8) {
+            Spacer()
+            Text("Не удалось транскрибировать запись.")
+                .foregroundColor(.gray)
+                .font(.system(size: 15))
+            Spacer()
+        }
+    }
+
+    var transcriptionScrollView: some View {
+        ScrollView {
+            Text(transcriptionText)
+                .foregroundColor(.white)
+                .font(.system(size: 16))
+                .padding()
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(10)
+        }
+        .padding(.horizontal)
+    }
+
+    var bottomActionsView: some View {
+        VStack(spacing: 0) {
+            Divider().background(Color.black.opacity(0.3))
+            HStack {
+                Button(action: {}) {
                     HStack {
                         Image(systemName: "sparkles")
                         Text("AI")
                     }
-                    .padding()
-                    .background(Color("ButtonColor"))
                     .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color(hex: "#7B87FF"))
                     .cornerRadius(10)
                 }
+
                 Spacer()
-                Button(action: {
-                    // Действие для кнопки копирования
-                }) {
-                    Image(systemName: "doc.on.doc")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                }
-                
-                Button(action: {
-                    // Действие для кнопки шаринга
-                }) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.title2)
-                        .foregroundColor(.white)
+
+                HStack(spacing: 24) {
+                    Button(action: {}) {
+                        Image(systemName: "doc.on.doc")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                    }
+
+                    Button(action: {}) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                    }
                 }
             }
-            .padding(.bottom)
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color.black)
         }
-        .padding()
-        .background(Color("BackgroundColor").ignoresSafeArea())
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            startTranscription()
-            fetchAudioDuration()
-            setupAudioPlayer()
-        }
-        .onDisappear {
-            stopAudio()
-        }
+        .ignoresSafeArea(edges: .bottom)
     }
-    
-    private func startTranscription() {
+}
+
+fileprivate extension RecordingDetailView {
+    func startTranscription() {
         transcriptionManager.transcribeAudio(url: recording.url) { transcription in
             DispatchQueue.main.async {
                 if let text = transcription, !text.isEmpty {
                     transcriptionText = text
                     audioTitle = text.components(separatedBy: " ").prefix(4).joined(separator: " ")
                 } else {
-                    transcriptionText = "Не удалось транскрибировать запись."
+                    transcriptionText = ""
                     audioTitle = "Аудиозапись"
                 }
                 isTranscribing = false
             }
         }
     }
-    
-    private func fetchAudioDuration() {
+
+    func fetchAudioDuration() {
         let asset = AVURLAsset(url: recording.url)
-        
         Task {
             do {
                 let duration = try await asset.load(.duration)
                 let durationInSeconds = CMTimeGetSeconds(duration)
-                
+
                 let minutes = Int(durationInSeconds) / 60
                 let seconds = Int(durationInSeconds) % 60
-                
+
                 DispatchQueue.main.async {
                     self.audioDuration = String(format: "%02d:%02d", minutes, seconds)
                 }
@@ -157,9 +223,8 @@ struct RecordingDetailView: View {
             }
         }
     }
-    
-    
-    private func setupAudioPlayer() {
+
+    func setupAudioPlayer() {
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: recording.url)
             audioPlayer?.prepareToPlay()
@@ -167,20 +232,20 @@ struct RecordingDetailView: View {
             print("Ошибка при загрузке аудио: \(error.localizedDescription)")
         }
     }
-    
-    private func togglePlayPause() {
+
+    func togglePlayPause() {
         guard let player = audioPlayer else { return }
-        
+
         if player.isPlaying {
             player.pause()
         } else {
             player.play()
         }
-        
+
         isPlaying.toggle()
     }
-    
-    private func stopAudio() {
+
+    func stopAudio() {
         audioPlayer?.stop()
         isPlaying = false
     }

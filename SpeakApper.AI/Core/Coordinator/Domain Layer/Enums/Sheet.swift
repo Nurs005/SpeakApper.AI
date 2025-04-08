@@ -17,4 +17,6 @@ enum Sheet: String, Identifiable {
     case requestFeature
     case faq
     case sendFeedback
+    case customFeedback
+    case deleteSurveys
 }

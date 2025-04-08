@@ -11,16 +11,32 @@ struct FAQView: View {
     @Environment(Coordinator.self) var coordinator
     @StateObject private var viewModel = FAQViewModel()
     @State private var expandedQuestion: Int? = nil
-
+    @State private var isLoading: Bool = true
+    
     var body: some View {
         VStack(spacing: 16) {
             headerView
-            faqTitleView
-            faqListView
-            Spacer()
+            
+            if isLoading {
+                Spacer()
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .foregroundColor(.white)
+                    .scaleEffect(1.3)
+                Spacer()
+            } else {
+                faqTitleView
+                faqListView
+                Spacer()
+            }
         }
         .padding(.horizontal, 16)
         .background(Color(hex: "#25242A").edgesIgnoringSafeArea(.all))
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                isLoading = false
+            }
+        }
     }
 }
 
@@ -91,27 +107,28 @@ fileprivate extension FAQView {
             .padding(.top, 8)
         }
     }
-
+    
     func faqItem(item: FAQItem, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(item.title)
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-
+                
                 Spacer()
-
+                
                 Button(action: {
                     withAnimation {
                         expandedQuestion = (expandedQuestion == index ? nil : index)
                     }
                 }) {
                     Image(systemName: expandedQuestion == index ? "xmark" : "plus")
+                        .frame(width: 24, height: 24)
                         .foregroundColor(.white)
                 }
             }
             .padding()
-
+            
             if expandedQuestion == index {
                 Text(item.subtitle)
                     .font(.system(size: 16))
@@ -124,5 +141,5 @@ fileprivate extension FAQView {
         .background(Color(hex: "#2F2F37"))
         .cornerRadius(12)
     }
-
+    
 }
