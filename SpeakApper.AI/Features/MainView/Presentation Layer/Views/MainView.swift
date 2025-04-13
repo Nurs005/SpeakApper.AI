@@ -6,15 +6,10 @@
 //
 
 import SwiftUI
-import AVFoundation
 
 struct MainView: View {
-    @ObservedObject var viewModel: MainViewModel
+    @Bindable var viewModel: MainViewModel
     @Environment(Coordinator.self) var coordinator
-    
-    @StateObject private var recordingViewModel = RecordingViewModel()
-    @State private var isRecordingPresented = false
-    @State private var hasSavedRecording = false
     
     var body: some View {
         contentBodyView
@@ -23,27 +18,29 @@ struct MainView: View {
 
 fileprivate extension MainView {
     var contentBodyView: some View {
-        ZStack {
+        VStack(spacing: 16) {
+            headerView
+            
+            scrollableView
+            
+            Spacer()
+        }
+        .overlay(alignment: .bottom) {
+            VStack(spacing: 38) {
+                if !viewModel.hasRecordings {
+                    recordingTipView
+                }
+                
+                startRecordingButtonView
+            }
+            .padding(.bottom, 30)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .background(
             Color(.background)
                 .ignoresSafeArea()
-            
-            VStack(spacing: 16) {
-                headerView
-                
-                scrollableView
-                
-                Spacer()
-            }
-            .overlay(alignment: .bottom) {
-                VStack(spacing: 38) {
-                    recordingTipView
-                    
-                    startRecordingButtonView
-                }
-                .padding(.bottom, 30)
-            }
-            .padding(.horizontal, 16)
-        }
+        )
     }
     
     var headerView: some View {
@@ -69,7 +66,9 @@ fileprivate extension MainView {
             VStack(spacing: 16) {
                 searchBarView
                 
-                buyPremiumView
+                if !viewModel.hasSubscription {
+                    buyPremiumView
+                }
                 
                 quickActionsView
                     .padding(.vertical, 16)
@@ -174,6 +173,7 @@ fileprivate extension MainView {
     var startRecordingButtonTipView: some View {
         Image(.startRecordingButtonTip)
     }
+<<<<<<< HEAD
     
     var recordingsListView: some View {
         List {
@@ -235,4 +235,6 @@ fileprivate extension MainView {
         
         return String(format: "%02d:%02d", minutes, seconds)
     }
+=======
+>>>>>>> origin/develop
 }
