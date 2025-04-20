@@ -10,55 +10,58 @@ import AVFoundation
 
 struct RecordingView: View {
     @ObservedObject var viewModel: RecordingViewModel
+    @Environment(Coordinator.self) var coordinator
     
     @State private var recordingTime: TimeInterval = 0
     @State private var timer: Timer? = nil
     @State private var isPaused = false
-    
-    let maxRecordingDuration: TimeInterval = 120 
+    @State private var hasStopped = false
+
+    let maxRecordingDuration: TimeInterval = 120
     
     var body: some View {
-        contentBodyView
-            .onAppear { startRecording() }
-            .onDisappear { stopRecording(delete: false) }
-    }
-}
-// MARK: - UI Components
-
-fileprivate extension RecordingView {
-    
-    var contentBodyView: some View {
         ZStack {
             Color("BackgroundColor").ignoresSafeArea()
-            
+
             VStack(spacing: 24) {
-                waveView
+                AudioWaveFormView(audioLevels: viewModel.audioRecorder.audioLevels.map { CGFloat($0) })
+                    .frame(height: 150)
                     .padding(.top, 60)
-                
+
                 Spacer()
-                
+
                 timerView
-                
+
                 buyPremiumView
-//                    .padding(.horizontal)
                     .padding(.bottom, 72)
-                
+
                 controlsView
                     .padding(.bottom, 24)
             }
             .padding(.horizontal, 16)
         }
+        .onAppear { startRecording() }
+        .onDisappear { stopRecording(delete: false) }
+    }
+}
+
+// MARK: - Components
+extension RecordingView {
+    var timerView: some View {
+        HStack(spacing: 6) {
+            Text(formatTime(recordingTime))
+                .foregroundColor(.white)
+            Text(" / ")
+                .foregroundColor(Color(hex: "#454358"))
+            Text("2:00")
+                .foregroundColor(Color(hex: "#454358"))
+        }
+        .font(.system(size: 53, weight: .bold))
     }
 
-    var waveView: some View {
-        AudioWaveFormView(audioLevels: viewModel.audioRecorder.audioLevels)
-            .frame(height: 150)
-    }
-    
     var buyPremiumView: some View {
         HStack(spacing: 4) {
             Image(.premiumLightning)
-            
             Text("Попробуйте SpeakApper Premium бесплатно\nНажмите, чтобы попробовать сейчас!")
                 .font(.system(size: 15))
                 .foregroundColor(.white)
@@ -73,18 +76,6 @@ fileprivate extension RecordingView {
                            endPoint: .trailing)
         )
         .cornerRadius(10)
-    }
-    
-    var timerView: some View {
-        HStack(spacing: 6) {
-            Text(formatTime(recordingTime))
-                .foregroundColor(.white)
-            Text(" / ")
-                .foregroundColor(Color(hex: "#454358"))
-            Text("2:00")
-                .foregroundColor(Color(hex: "#454358"))
-        }
-        .font(.system(size: 53, weight: .bold))
     }
 
     var controlsView: some View {
@@ -114,13 +105,12 @@ fileprivate extension RecordingView {
             }
         }
         .frame(maxWidth: .infinity)
-        //.padding(.horizontal, 32)
     }
-    
+
     func micControlButton(
         imageName: String,
         text: String,
-        backgroundColor: Color = Color(hex: "#454358"),
+        backgroundColor: Color,
         iconColor: Color = .white,
         size: CGFloat = 56,
         action: @escaping () -> Void
@@ -138,7 +128,7 @@ fileprivate extension RecordingView {
                         .frame(width: size * 0.38, height: size * 0.38)
                         .foregroundColor(iconColor)
                 }
-                
+
                 Text(text)
                     .font(.caption)
                     .foregroundColor(Color(hex: "#7B7A94"))
@@ -147,32 +137,35 @@ fileprivate extension RecordingView {
     }
 }
 
-// MARK: - Recording Logic
-fileprivate extension RecordingView {
-    
+// MARK: - Logic
+extension RecordingView {
     func startRecording() {
         viewModel.audioRecorder.startRecording()
         startTimer()
     }
 
     func stopRecording(delete: Bool) {
+        guard !hasStopped else { return }
+        hasStopped = true
+
         viewModel.audioRecorder.stopRecording()
-        timer?.invalidate()
-        
-        if delete, let lastRecording = viewModel.audioRecorder.recordings.last {
-            viewModel.audioRecorder.deleteRecording(url: lastRecording.url)
+
+        if delete,
+           let url = viewModel.audioRecorder.lastRecordedURL {
+            viewModel.audioRecorder.deleteRecording(url: url)
         } else {
-            viewModel.fetchRecordings()
+            viewModel.handleSaveLastRecording()
         }
+        coordinator.pop()
     }
 
     func togglePause() {
         isPaused.toggle()
         if isPaused {
-            viewModel.audioRecorder.audioRecorder?.pause()
+            viewModel.audioRecorder.pause()
             timer?.invalidate()
         } else {
-            viewModel.audioRecorder.audioRecorder?.record()
+            viewModel.audioRecorder.resume()
             startTimer()
         }
     }
@@ -192,5 +185,4 @@ fileprivate extension RecordingView {
         let seconds = Int(time) % 60
         return String(format: "%01d:%02d", minutes, seconds)
     }
-
 }

@@ -8,14 +8,13 @@
 import Foundation
 import Combine
 
-typealias MainDependencies =
-    HasRecordingUseCase
+typealias MainDependencies = HasRecordingUseCase
 
 @Observable
 final class MainViewModel {
     @ObservationIgnored private let recordingUseCase: RecordingUseCaseProtocol
     @ObservationIgnored private(set) var recordingItemsViewModels: [RecordingItemViewModel] = []
-    
+
     var searchText: String = ""
     
     var hasRecordings: Bool {
@@ -28,7 +27,17 @@ final class MainViewModel {
     
     init(dependencies: MainDependencies) {
         self.recordingUseCase = dependencies.recordingUseCase
-        
-        recordingItemsViewModels = [RecordingItemViewModel(model: .init(url: URL(string: "https://www.youtube.com")!, date: Date(), sequence: 23, transcription: nil))]
+        reloadRecordings()
     }
+
+    func reloadRecordings() {
+        let recordings = recordingUseCase.getRecordings()
+        self.recordingItemsViewModels = recordings.map { RecordingItemViewModel(model: $0) }
+    }
+
+    func appendRecording(_ recording: Recording) {
+        let vm = RecordingItemViewModel(model: recording)
+        self.recordingItemsViewModels.insert(vm, at: 0)
+    }
+    
 }

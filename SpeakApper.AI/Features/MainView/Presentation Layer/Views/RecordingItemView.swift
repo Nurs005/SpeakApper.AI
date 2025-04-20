@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RecordingItemView: View {
-    let viewModel: RecordingItemViewModel
+    @ObservedObject var viewModel: RecordingItemViewModel
     
     var body: some View {
         contentBodyView

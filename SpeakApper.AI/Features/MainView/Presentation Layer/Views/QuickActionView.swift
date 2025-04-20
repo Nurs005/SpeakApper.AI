@@ -39,10 +39,8 @@ struct QuickActionView: View {
             .background(Color("listColor"))
             .cornerRadius(10)
         }
-<<<<<<< HEAD
-=======
-        .frame(maxWidth: .infinity)
->>>>>>> origin/develop
+     //   .frame(maxWidth: .infinity)
+
     }
     
     private var iconView: some View {

@@ -8,25 +8,60 @@
 import Foundation
 import Combine
 
-class RecordingViewModel: ObservableObject {
+final class RecordingViewModel: ObservableObject {
     @Published var recordings: [Recording] = []
     @Published var searchText: String = ""
     @Published var transcriptions: [URL: String] = [:]
-
-    let audioRecorder = AudioRecorder()
+    @Published var isPlaying: Bool = false
+    @Published var currentlyPlayingURL: URL? = nil
+    
+    @Published var onSaveRecording: ((Recording) -> Void)?
+    
+    let useCase: RecordingUseCaseProtocol
+    let audioRecorder: AudioRecorder
     private let transcriptionManager = TranscriptionManager()
-
-    init() {
+    
+    init(useCase: RecordingUseCaseProtocol = RecordingUseCase(
+        repository: RecordingRepository(
+            localDataSource: RecordingLocalDataSource()
+        )
+    )) {
+        self.useCase = useCase
+        self.audioRecorder = AudioRecorder(useCase: useCase)
         fetchRecordings()
+        
+        self.audioRecorder.onFinishPlaying = { [weak self] in
+            DispatchQueue.main.async {
+                self?.isPlaying = false
+                self?.currentlyPlayingURL = nil
+            }
+        }
     }
-
+    
     // MARK: - Получение записей
     func fetchRecordings() {
-        audioRecorder.fetchRecordings()
-        recordings = audioRecorder.recordings
+        recordings = useCase.getRecordings()
         fetchTranscriptions()
     }
-
+    
+    // MARK: - Сохранение записи (если не используется внутри AudioRecorder)
+    func handleSaveLastRecording() {
+        guard let url = audioRecorder.lastRecordedURL,
+              let duration = audioRecorder.lastRecordedDuration else { return }
+        
+        let recording = Recording(
+            url: url,
+            date: Date(),
+            sequence: 0,
+            transcription: nil,
+            duration: duration
+        )
+        
+        onSaveRecording?(recording)
+        
+        fetchRecordings()
+    }
+    
     // MARK: - Транскрипция
     private func fetchTranscriptions() {
         for recording in recordings {
@@ -39,25 +74,32 @@ class RecordingViewModel: ObservableObject {
             }
         }
     }
-
-    // MARK: - Воспроизведение записи
+    
+    // MARK: - Воспроизведение
     func playRecording(_ recording: Recording) {
-        audioRecorder.playRecording(url: recording.url) { success in
-            if success {
-                print("Воспроизведение начато")
-            } else {
-                print("Ошибка воспроизведения")
+        if currentlyPlayingURL == recording.url && isPlaying {
+            audioRecorder.stopPlayback()
+            isPlaying = false
+            currentlyPlayingURL = nil
+        } else {
+            audioRecorder.playRecording(url: recording.url) { [weak self] success in
+                DispatchQueue.main.async {
+                    if success {
+                        self?.currentlyPlayingURL = recording.url
+                        self?.isPlaying = true
+                    }
+                }
             }
         }
     }
-
-    // MARK: - Удаление записи
+    
+    // MARK: - Удаление
     func deleteRecording(_ recording: Recording) {
         audioRecorder.deleteRecording(url: recording.url)
         fetchRecordings()
     }
-
-    // MARK: - Фильтрация записей
+    
+    // MARK: - Фильтрация
     func filteredRecordings() -> [Recording] {
         if searchText.isEmpty {
             return recordings

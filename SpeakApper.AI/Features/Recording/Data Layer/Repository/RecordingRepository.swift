@@ -8,7 +8,8 @@
 import Foundation
 
 protocol RecordingRepositoryInterface: AnyObject {
-    func getRecordings()
+    func getRecordings() -> [Recording]
+    func saveRecording(from url: URL, duration: TimeInterval)
 }
 
 final class RecordingRepository {
@@ -20,7 +21,12 @@ final class RecordingRepository {
 }
 
 extension RecordingRepository: RecordingRepositoryInterface {
-    func getRecordings() {
+    func getRecordings() -> [Recording] {
         localDataSource.getRecordings()
     }
+    
+    func saveRecording(from url: URL, duration: TimeInterval) {
+        localDataSource.saveRecording(from: url, duration: duration)
+    }
+   
 }

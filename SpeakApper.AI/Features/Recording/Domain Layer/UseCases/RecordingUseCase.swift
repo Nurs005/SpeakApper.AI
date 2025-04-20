@@ -17,10 +17,14 @@ final class RecordingUseCase {
 }
 
 extension RecordingUseCase: RecordingUseCaseProtocol {
-    func getRecordings() {
-        repository.getRecordings()
+    func getRecordings() -> [Recording] {
+        return repository.getRecordings()
     }
-    
+
+    func saveRecording(from url: URL, duration: TimeInterval) {
+        repository.saveRecording(from: url, duration: duration)
+    }
+
     func getAudioDuration(for recording: Recording) -> String {
         let asset = AVURLAsset(url: recording.url)
         let duration = asset.duration
@@ -31,4 +35,5 @@ extension RecordingUseCase: RecordingUseCaseProtocol {
 
         return String(format: "%02d:%02d", minutes, seconds)
     }
+    
 }

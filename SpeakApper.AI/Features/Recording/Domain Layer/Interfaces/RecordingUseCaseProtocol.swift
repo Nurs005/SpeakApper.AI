@@ -8,5 +8,6 @@
 import Foundation
 
 protocol RecordingUseCaseProtocol: AnyObject {
-    func getRecordings()
+    func getRecordings() -> [Recording]
+    func saveRecording(from url: URL, duration: TimeInterval)
 }

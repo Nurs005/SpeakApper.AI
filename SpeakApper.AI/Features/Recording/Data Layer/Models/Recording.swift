@@ -13,6 +13,8 @@ struct Recording: Identifiable, Equatable {
     let date: Date
     let sequence: Int
     var transcription: String?
+    let duration: TimeInterval
+    
 
     var formattedDate: String {
         let formatter = DateFormatter()
