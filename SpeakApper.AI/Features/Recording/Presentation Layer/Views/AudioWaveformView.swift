@@ -20,7 +20,7 @@ struct AudioWaveFormView: View {
         GeometryReader { geometry in
             let availableWidth = geometry.size.width
             let totalSpacing = barSpacing * CGFloat(audioLevels.count - 1)
-            let adjustedBarWidth = (availableWidth - totalSpacing) / CGFloat(audioLevels.count)
+           // let adjustedBarWidth = (availableWidth - totalSpacing) / CGFloat(audioLevels.count)
 
             HStack(alignment: .center, spacing: barSpacing) {
                 ForEach(audioLevels.indices, id: \.self) { index in
@@ -29,7 +29,7 @@ struct AudioWaveFormView: View {
 
                     RoundedRectangle(cornerRadius: barCornerRadius)
                         .fill(Color(hex: "#454358"))
-                        .frame(width: adjustedBarWidth, height: height)
+                        //.frame(width: adjustedBarWidth, height: height)
                         .animation(.easeInOut(duration: 0.15), value: level)
                 }
             }

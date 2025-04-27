@@ -130,7 +130,9 @@ fileprivate extension MainView {
     var recordingsView: some View {
         LazyVStack(spacing: 24) {
             ForEach(viewModel.recordingItemsViewModels, id: \.self) { viewModel in
-                NavigationLink(destination: RecordingDetailView(recording: viewModel.model)) {
+                NavigationLink {
+                    RecordingDetailView(viewModel: RecordingDetailViewModel(recording: viewModel.model))
+                } label: {
                     RecordingItemView(viewModel: viewModel)
                 }
                 //RecordingItemView(viewModel: viewModel)

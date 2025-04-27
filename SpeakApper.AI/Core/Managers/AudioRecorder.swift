@@ -30,7 +30,9 @@ final class AudioRecorder: NSObject, ObservableObject {
     // MARK: - Start
     func startRecording() {
         let fileName = UUID().uuidString + ".m4a"
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        //let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let url = directory.appendingPathComponent(fileName)
         
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
