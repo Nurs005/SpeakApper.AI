@@ -56,11 +56,11 @@
             symbolName = "*0x10209d508">
             <Locations>
                <Location
-                  uuid = "E5E8F59E-4895-4F54-B442-28D837C44741 - a3458f3bdea364ac"
+                  uuid = "E5E8F59E-4895-4F54-B442-28D837C44741 - d061f2797e576f5d"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "mach_o::Fixups::forEachBindUnified_Opcodes(Diagnostics&amp;, bool, void (unsigned long long, unsigned int, mach_o::Fixups::BindTargetInfo const&amp;, bool&amp;) block_pointer, void (unsigned long long, unsigned int, mach_o::Fixups::BindTargetInfo const&amp;, bool&amp;) block_pointer) const"
+                  symbolName = "mach_port_destruct"
                   moduleName = "dyld"
                   usesParentBreakpointCondition = "Yes">
                </Location>
