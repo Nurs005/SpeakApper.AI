@@ -14,6 +14,7 @@ protocol HasRecordingUseCase {
 final class Dependencies:
     HasRecordingUseCase {
     private let network: Networking
+    let transcriptionManager: TranscriptionManager = .shared
     var recordingUseCase: any RecordingUseCaseProtocol
     
     init() {

@@ -44,7 +44,7 @@ final class ExportManager {
         let renderer = UIPrintPageRenderer()
         renderer.addPrintFormatter(formatter, startingAtPageAt: 0)
         
-        let page = CGRect(x: 0, y: 0, width: 595.2, height: 841.8) // A4
+        let page = CGRect(x: 0, y: 0, width: 595.2, height: 841.8) 
         renderer.setValue(page, forKey: "paperRect")
         renderer.setValue(page, forKey: "printableRect")
         

@@ -56,13 +56,18 @@
             symbolName = "*0x10209d508">
             <Locations>
                <Location
-                  uuid = "E5E8F59E-4895-4F54-B442-28D837C44741 - d061f2797e576f5d"
+                  uuid = "E5E8F59E-4895-4F54-B442-28D837C44741 - 6a67eaadd29bc23f"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "mach_port_destruct"
-                  moduleName = "dyld"
-                  usesParentBreakpointCondition = "Yes">
+                  symbolName = "SpeakApper_AI.RecordingViewModel.bindTranscriptions() -&gt; ()"
+                  moduleName = "SpeakApper.AI"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///%3Ccompiler-generated%3E"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
                </Location>
             </Locations>
          </BreakpointContent>

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Recording: Identifiable, Equatable {
+struct Recording: Identifiable, Equatable, Hashable {
     let id = UUID()
     let url: URL
     let date: Date

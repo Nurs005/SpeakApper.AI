@@ -8,7 +8,6 @@
 import SwiftUI
 import AVKit
 
-
 struct ActivityView: UIViewControllerRepresentable {
     let activityItems: [Any]
     func makeUIViewController(context: Context) -> UIActivityViewController {
@@ -17,27 +16,54 @@ struct ActivityView: UIViewControllerRepresentable {
     func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
 }
 
+struct LanguagePickerView: View {
+    let selectedLanguage: TranscriptionLanguage
+    let onSelect: (TranscriptionLanguage) -> Void
+    
+    var body: some View {
+        NavigationView {
+            List {
+                ForEach(TranscriptionLanguage.allCases, id: \.self) { lang in
+                    Button {
+                        onSelect(lang)
+                    } label: {
+                        HStack {
+                            Text(lang.displayName)
+                            if lang == selectedLanguage {
+                                Spacer()
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .navigationTitle("Язык голоса на записи")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+}
+
 struct RecordingDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var viewModel: RecordingDetailViewModel
-
-    // MARK: — Состояния
+    
     @State private var showShareSheet = false
     @State private var playbackRate: Float = 1.0
     @State private var showCustomExportMenu = false
     @State private var exportMenuPosition: CGPoint = .zero
     @State private var showCopiedAlert = false
     @State private var showAIActions = false
-
+    @State private var showLanguagePicker = false
+    
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color(hex: "#252528")
-                .ignoresSafeArea()
-
+            Color(hex: "#252528").ignoresSafeArea()
+            
             VStack(spacing: 24) {
                 headerView
                 audioPlayerView
-
+                
                 if viewModel.isTranscribing {
                     loadingView
                 } else if viewModel.transcriptionText.isEmpty {
@@ -46,34 +72,36 @@ struct RecordingDetailView: View {
                     transcriptionHeaderView
                     transcriptionScrollView
                 }
-
+                
                 Spacer(minLength: 100)
             }
             .padding(.horizontal)
-
+            
             bottomActionsView
         }
         .navigationBarHidden(true)
-        
         .sheet(isPresented: $showShareSheet) {
             ActivityView(activityItems: [viewModel.audioURL])
         }
-        
         .sheet(isPresented: $showAIActions) {
-            AIActionView()
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
-                .presentationBackground(Color.black.opacity(0.4))
+        AIActionView(viewModel: viewModel)
+            .presentationDetents([.medium])
+            .presentationBackground(Color.black.opacity(0.4))
         }
-
-        .onDisappear {
-            viewModel.stopPlayback()
+        .sheet(isPresented: $showLanguagePicker) {
+            LanguagePickerView(
+                selectedLanguage: viewModel.selectedLanguage,
+                onSelect: { lang in
+                    viewModel.changeLanguage(to: lang)
+                    showLanguagePicker = false
+                }
+            )
         }
-
+        .onDisappear { viewModel.stopPlayback() }
         .overlay(copiedAlertOverlay)
         .overlay(customExportMenu)
     }
-
+    
     // MARK: — Header
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -85,7 +113,7 @@ struct RecordingDetailView: View {
                 .font(.system(size: 17, weight: .medium))
                 .foregroundColor(.white)
             }
-
+            
             Text(viewModel.audioTitle)
                 .font(.system(size: 21, weight: .bold))
                 .foregroundColor(.white)
@@ -93,13 +121,11 @@ struct RecordingDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
-    // MARK: — Audio Player + menu
+    
+    // MARK: — Audio Player + волна + меню
     private var audioPlayerView: some View {
         HStack(spacing: 12) {
-            Button {
-                viewModel.togglePlayPause()
-            } label: {
+            Button { viewModel.togglePlayPause() } label: {
                 Circle()
                     .fill(Color(hex: "#6F7CFF"))
                     .frame(width: 32, height: 32)
@@ -109,35 +135,39 @@ struct RecordingDetailView: View {
                             .foregroundColor(.white)
                     )
             }
-
-            HStack(spacing: 2) {
-                ForEach(0..<30, id: \.self) { _ in
-                    Capsule()
-                        .fill(Color.white.opacity(0.8))
-                        .frame(width: 2, height: CGFloat.random(in: 10...22))
+            
+            GeometryReader { geo in
+                let barWidth: CGFloat = 3
+                let spacing: CGFloat  = 2
+                let totalBars = Int((geo.size.width + spacing) / (barWidth + spacing))
+                
+                HStack(spacing: spacing) {
+                    ForEach(0..<totalBars, id: \.self) { _ in
+                        Capsule()
+                            .fill(Color.white.opacity(0.8))
+                            .frame(width: barWidth, height: CGFloat.random(in: 10...22))
+                    }
                 }
+                .frame(width: geo.size.width, height: geo.size.height)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
+            .frame(height: 48)
+            
             Spacer()
-
+            
             Text(viewModel.audioDuration)
                 .font(.subheadline)
                 .foregroundColor(Color.white.opacity(0.5))
-
+            
             Menu {
-                Button("Поделиться аудио") {
-                    showShareSheet = true
-                }
-
+                Button("Поделиться аудио") { showShareSheet = true }
                 Menu("Скорость воспроизведения") {
                     ForEach([1.0, 1.2, 1.5, 2.0], id: \.self) { rate in
-                        Button(action: {
+                        Button {
                             playbackRate = Float(rate)
                             viewModel.setPlaybackRate(playbackRate)
-                        }) {
+                        } label: {
                             Label(
-                                "\(String(format: "%.1f", rate))×",
+                                String(format: "%.1f×", rate),
                                 systemImage: playbackRate == Float(rate) ? "checkmark" : ""
                             )
                         }
@@ -145,7 +175,6 @@ struct RecordingDetailView: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    //.rotationEffect(.degrees(90))
                     .font(.system(size: 20))
                     .foregroundColor(.white)
                     .padding(.vertical, 8)
@@ -157,8 +186,8 @@ struct RecordingDetailView: View {
         .background(Color(hex: "#292A33"))
         .cornerRadius(12)
     }
-
-    // MARK: — Транскрибирование / ошибки / текст
+    
+    // MARK: — Loading / Error
     private var loadingView: some View {
         VStack(spacing: 16) {
             Spacer()
@@ -171,7 +200,7 @@ struct RecordingDetailView: View {
             Spacer()
         }
     }
-
+    
     private var errorView: some View {
         VStack(spacing: 8) {
             Spacer()
@@ -181,50 +210,94 @@ struct RecordingDetailView: View {
             Spacer()
         }
     }
-
+    
+    // MARK: — Dynamic Header (Language or AI)
     private var transcriptionHeaderView: some View {
         HStack(spacing: 8) {
-            Text("Транскрипция - English (авто)")
+            let titleText: String = {
+                if let action = viewModel.lastAIAction {
+                    return "AI – \(displayName(for: action))"
+                } else {
+                    return "Транскрипция – \(viewModel.selectedLanguage.displayName)"
+                }
+            }()
+            
+            Text(titleText)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(Color.white.opacity(0.6))
-            Image(systemName: "pencil")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(Color.white.opacity(0.6))
+            
+            if viewModel.lastAIAction == nil {
+                Button { showLanguagePicker = true } label: {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color.white.opacity(0.6))
+                }
+                .buttonStyle(.plain)
+            }
+            
             Spacer()
+            
+            // undo / redo для AI
             HStack(spacing: 16) {
-                Image("lets-icons_back")
-                Image("lets-icons_right")
+                if viewModel.lastAIAction != nil {
+                    Button(action: viewModel.undoAI) {
+                        Image(systemName: "arrow.uturn.backward")
+                    }
+                    Button(action: viewModel.redoAI) {
+                        Image(systemName: "arrow.uturn.forward")
+                    }
+                } else {
+                    Image("lets-icons_back")
+                    Image("lets-icons_right")
+                }
             }
             .font(.system(size: 24))
+            .foregroundColor(Color.white.opacity(0.6))
         }
         .padding(.bottom, 4)
     }
-
+    
+    // MARK: — Editable Text + Feedback Icons
     private var transcriptionScrollView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text(viewModel.transcriptionText)
-                    .font(.system(size: 16))
-                    .foregroundColor(.white)
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer()
-                HStack(spacing: 20) {
-                    Image(systemName: "hand.thumbsup")
-                    Image(systemName: "hand.thumbsdown")
-                    Image(systemName: "arrow.clockwise")
+                if #available(iOS 16.0, *) {
+                    TextEditor(text: $viewModel.transcriptionText)
+                        .font(.system(size: 16))
+                        .foregroundColor(.white)
+                        .scrollContentBackground(.hidden)
+                        .background(Color.clear)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 4)
+                        .frame(minHeight: 420)
+                } else {
+                    TextEditor(text: $viewModel.transcriptionText)
+                        .font(.system(size: 16))
+                        .foregroundColor(.white)
+                        .background(Color.clear)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 4)
+                        .frame(minHeight: 420)
                 }
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
+                
+//                HStack(spacing: 20) {
+//                    Image(systemName: "arrow.clockwise")
+//                }
+//                .font(.system(size: 14))
+//                .foregroundColor(.gray)
+                
             }
+            .padding(.horizontal)
         }
+       
     }
-
-    // MARK: — Export / Copy / AI
+    
+    // MARK: — Bottom Bar: AI / Copy / Export
     private var bottomActionsView: some View {
         VStack(spacing: 0) {
             Divider().background(Color.black.opacity(0.3))
+            
             HStack {
-                // AI
                 Button {
                     withAnimation { showAIActions = true }
                 } label: {
@@ -239,11 +312,10 @@ struct RecordingDetailView: View {
                     .background(Color(hex: "#6F7CFF"))
                     .cornerRadius(10)
                 }
-
+                
                 Spacer()
-
+                
                 HStack(spacing: 24) {
-                    // Copy text
                     Button {
                         UIPasteboard.general.string = viewModel.transcriptionText
                         withAnimation { showCopiedAlert = true }
@@ -254,8 +326,7 @@ struct RecordingDetailView: View {
                         Image("cil_copy")
                             .font(.system(size: 24))
                     }
-
-                    // Export menu trigger
+                    
                     GeometryReader { geo in
                         Button {
                             exportMenuPosition = CGPoint(
@@ -278,8 +349,8 @@ struct RecordingDetailView: View {
         }
         .ignoresSafeArea(edges: .bottom)
     }
-
-    // MARK: — Оверлей для копирования
+    
+    // MARK: — Copied Alert Overlay
     private var copiedAlertOverlay: some View {
         VStack {
             Spacer()
@@ -297,8 +368,8 @@ struct RecordingDetailView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: showCopiedAlert)
     }
-
-    // MARK: — Меню «Отправить как»
+    
+    // MARK: — Custom Export Menu
     private var customExportMenu: some View {
         Group {
             if showCustomExportMenu {
@@ -339,4 +410,22 @@ struct RecordingDetailView: View {
             }
         }
     }
+    
+    // MARK: — Helpers
+    private func displayName(for action: String) -> String {
+        switch action {
+            case "structurize":    return "Добавить структуру"
+            case "summarizePromt": return "Резюмировать"
+            case "frendly":        return "Дружелюбно"
+            case "note":           return "Заметка"
+            case "bussiness":      return "Бизнес"
+            case "blog":           return "Блог"
+            case "proffesional":   return "Профессионально"
+            case "nefor":          return "Информативно"
+            case "song":           return "Песня"
+            case "angryBird":      return "Angry Bird"
+            default:               return action.capitalized
+        }
+    }
 }
+

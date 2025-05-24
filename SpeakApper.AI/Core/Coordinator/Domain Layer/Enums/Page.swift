@@ -15,4 +15,5 @@ enum Page: Hashable {
     case account
     case login
     case authCode(email: String)
+    case detail(recording: Recording) 
 }

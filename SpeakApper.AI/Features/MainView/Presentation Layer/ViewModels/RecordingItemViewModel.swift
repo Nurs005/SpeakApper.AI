@@ -8,56 +8,52 @@
 import Foundation
 import Combine
 
-final class RecordingItemViewModel: ObservableObject {
+final class RecordingItemViewModel: ObservableObject, Hashable {
     let model: Recording
-    @Published var title: String = "Новая запись"
-    
-    private let transcriptionManager = TranscriptionManager()
-    private var cancellables = Set<AnyCancellable>()
-    
-    init(model: Recording) {
+    private let transcriptionManager: TranscriptionManager
+    private var cancellable: AnyCancellable?
+
+    @Published var title: String = "Транскрибируется..."
+    @Published var date: String
+    @Published var duration: String
+
+    init(
+        model: Recording,
+        transcriptionManager: TranscriptionManager = .shared
+    ) {
         self.model = model
-        self.title = Self.generateTitle(from: model.transcription ?? "Транскрибируется...")
-        
-        if model.transcription == nil || model.transcription?.isEmpty == true {
-            transcriptionManager.transcribeAudio(url: model.url) { [weak self] text in
-                if let text, !text.isEmpty {
-                    DispatchQueue.main.async {
-                        self?.title = Self.generateTitle(from: text)
-                    }
-                }
+        self.transcriptionManager = transcriptionManager
+        self.date = model.formattedDate
+        let totalSec = Int(model.duration)
+        let minutes = totalSec / 60
+        let seconds = totalSec % 60
+        self.duration = String(format: "%d:%02d", minutes, seconds)
+
+        cancellable = transcriptionManager.$transcriptions
+            .map { $0[model.url] }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] maybeText in
+                guard let text = maybeText, !text.isEmpty else { return }
+                self?.title = Self.generateTitle(from: text)
             }
+
+        if transcriptionManager.transcriptions[model.url] == nil {
+            transcriptionManager.transcribeAudioWithFallback(url: model.url) { _ in }
         }
     }
-    
-    private static func generateTitle(from text: String) -> String {
-        text.components(separatedBy: " ").prefix(4).joined(separator: " ")
-    }
-    
-    var date: String {
-        model.formattedDate
-    }
-    
-    var duration: String {
-        let totalSeconds = Int(model.duration)
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        return "\(minutes):" + String(format: "%02d", seconds)
-    }
-}
 
-extension RecordingItemViewModel: Hashable {
+    private static func generateTitle(from text: String) -> String {
+        text.components(separatedBy: " ")
+            .prefix(4)
+            .joined(separator: " ")
+    }
+
+    // MARK: - Hashable & Equatable
+    static func == (lhs: RecordingItemViewModel, rhs: RecordingItemViewModel) -> Bool {
+        lhs.model.url == rhs.model.url
+    }
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(model.url)
-        hasher.combine(model.date)
-        hasher.combine(model.duration)
-    }
-}
-
-extension RecordingItemViewModel: Equatable {
-    static func == (lhs: RecordingItemViewModel, rhs: RecordingItemViewModel) -> Bool {
-        lhs.model.url == rhs.model.url &&
-        lhs.model.date == rhs.model.date &&
-        lhs.model.duration == rhs.model.duration
     }
 }

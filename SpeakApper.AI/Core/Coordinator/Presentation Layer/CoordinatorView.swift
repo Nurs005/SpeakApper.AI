@@ -46,6 +46,8 @@ fileprivate extension CoordinatorView {
                 buildLoginPage()
             case .authCode(let email):
                 buildAuthCodePage(email: email)
+            case .detail(let recording):
+                buildDetailPage(for: recording)
         }
     }
     
@@ -63,7 +65,7 @@ fileprivate extension CoordinatorView {
             case .sendFeedback:
                 buildSendFeedbackSheet()
             case .customFeedback:
-                buildCustomFeedbackSheet()   
+                buildCustomFeedbackSheet()
             case .deleteSurveys:
                 buildDeleteSurveysSheet()
         }
@@ -93,9 +95,8 @@ fileprivate extension CoordinatorView {
     }
     
     func buildRecordingPage() -> some View {
-        let viewModel = RecordingViewModel()
-        
-        return RecordingView(viewModel: viewModel)
+        let vm = RecordingViewModel()
+        return RecordingView(viewModel: vm)
     }
     
     func buildSettingsPage() -> some View {
@@ -115,6 +116,14 @@ fileprivate extension CoordinatorView {
     func buildAuthCodePage(email: String) -> some View {
         let authViewModel = AuthViewModel()
         return AuthCodeView(email: email, authViewModel: authViewModel)
+    }
+    
+    func buildDetailPage(for recording: Recording) -> some View {
+        let vm = RecordingDetailViewModel(
+            recording: recording,
+            transcriptionManager: dependencies.transcriptionManager
+        )
+        return RecordingDetailView(viewModel: vm)
     }
     
 }

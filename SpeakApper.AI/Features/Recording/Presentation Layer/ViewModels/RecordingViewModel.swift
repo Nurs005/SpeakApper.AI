@@ -9,36 +9,65 @@ import Foundation
 import Combine
 
 final class RecordingViewModel: ObservableObject {
-    // MARK: - Published Properties
+    
     @Published var recordings: [Recording] = []
     @Published var searchText: String = ""
     @Published var transcriptions: [URL: String] = [:]
     @Published var isPlaying: Bool = false
     @Published var currentlyPlayingURL: URL?
+    @Published var audioLevels: [Float] = []
     
     var onSaveRecording: ((Recording) -> Void)?
-
-    // MARK: - Dependencies
-    let useCase: RecordingUseCaseProtocol
-    let audioRecorder: AudioRecorder
-    private let transcriptionManager = TranscriptionManager()
     
-    private var cancellables = Set<AnyCancellable>()
-
+    // MARK: - Dependencies
+    private let useCase: RecordingUseCaseProtocol
+    let audioRecorder: AudioRecorder
+    private let transcriptionManager: TranscriptionManager
+    
+    private var transcriptionCancellable: AnyCancellable?
+    private var levelsCancellable: AnyCancellable?
+    
     // MARK: - Init
-    init(useCase: RecordingUseCaseProtocol = RecordingUseCase(
-        repository: RecordingRepository(
-            localDataSource: RecordingLocalDataSource()
-        )
-    )) {
+    init(
+        useCase: RecordingUseCaseProtocol = RecordingUseCase(
+            repository: RecordingRepository(
+                localDataSource: RecordingLocalDataSource()
+            )
+        ),
+        transcriptionManager: TranscriptionManager = .shared
+    ) {
         self.useCase = useCase
+        self.transcriptionManager = transcriptionManager
         self.audioRecorder = AudioRecorder(useCase: useCase)
+        
         bindAudioEvents()
+        bindAudioLevels()
+        bindTranscriptions()
         fetchRecordings()
     }
-
-    // MARK: - Binding Events
+    
+    // MARK: - Binding
     private func bindAudioEvents() {
+        audioRecorder.onFinishRecording = { [weak self] in
+            guard
+                let self = self,
+                let url = self.audioRecorder.lastRecordedURL,
+                let duration = self.audioRecorder.lastRecordedDuration
+            else { return }
+            
+            let newRec = Recording(
+                url: url,
+                date: Date(),
+                sequence: 0,
+                transcription: nil,
+                duration: duration
+            )
+            self.fetchRecordings()
+            DispatchQueue.main.async {
+                self.onSaveRecording?(newRec)
+            }
+        }
+        
         audioRecorder.onFinishPlaying = { [weak self] in
             DispatchQueue.main.async {
                 self?.isPlaying = false
@@ -47,54 +76,32 @@ final class RecordingViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Получение записей
-    func fetchRecordings() {
-        recordings = useCase.getRecordings().sorted { $0.date > $1.date }
-        fetchTranscriptions()
+    private func bindAudioLevels() {
+        levelsCancellable = audioRecorder.$audioLevels
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.audioLevels, on: self)
     }
     
-    // MARK: - Сохранение записи
-    func handleSaveLastRecording() {
-        guard let url = audioRecorder.lastRecordedURL,
-              let duration = audioRecorder.lastRecordedDuration else { return }
-        
-        let newRecording = Recording(
-            url: url,
-            date: Date(),
-            sequence: 0,
-            transcription: nil,
-            duration: duration
-        )
-        
-        onSaveRecording?(newRecording)
-        fetchRecordings()
+    private func bindTranscriptions() {
+        transcriptionCancellable = transcriptionManager.$transcriptions
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] cache in
+                self?.transcriptions = cache
+            }
     }
-
-    // MARK: - Транскрипция
-    private func fetchTranscriptions() {
+    
+    // MARK: - Recordings
+    func fetchRecordings() {
+        recordings = useCase.getRecordings()
+            .sorted { $0.date > $1.date }
         for recording in recordings {
-            if let existing = transcriptions[recording.url] {
-                print("Используем кэш для \(recording.url.lastPathComponent)")
-                continue
-            }
-            
-            if let existing = recording.transcription, !existing.isEmpty {
-                transcriptions[recording.url] = existing
-                continue
-            }
-
-            // Транскрипция
-            transcriptionManager.transcribeAudio(url: recording.url) { [weak self] transcription in
-                DispatchQueue.main.async {
-                    if let text = transcription {
-                        self?.transcriptions[recording.url] = text
-                    }
-                }
+            if transcriptionManager.transcriptions[recording.url] == nil {
+                transcriptionManager.transcribeAudioWithFallback(url: recording.url) { _ in }
             }
         }
     }
-
-    // MARK: - Воспроизведение
+    
+    // MARK: - Playback
     func playRecording(_ recording: Recording) {
         if currentlyPlayingURL == recording.url && isPlaying {
             audioRecorder.stopPlayback()
@@ -111,22 +118,22 @@ final class RecordingViewModel: ObservableObject {
             }
         }
     }
-
-    // MARK: - Удаление записи
-    func deleteRecording(_ recording: Recording) {
-        audioRecorder.deleteRecording(url: recording.url)
+    
+    // MARK: - Deletion
+    func delete(at offsets: IndexSet) {
+        offsets.forEach { idx in
+            let rec = recordings[idx]
+            useCase.deleteRecording(url: rec.url)
+        }
         fetchRecordings()
     }
-
-    // MARK: - Фильтрация
+    
+    // MARK: - Filtering
     func filteredRecordings() -> [Recording] {
         guard !searchText.isEmpty else { return recordings }
-
         return recordings.filter {
             $0.formattedDate.localizedCaseInsensitiveContains(searchText) ||
             $0.url.lastPathComponent.localizedCaseInsensitiveContains(searchText)
         }
     }
-    
-   
 }

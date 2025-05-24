@@ -9,46 +9,66 @@ import Foundation
 import AVFoundation
 
 final class RecordingLocalDataSource: RecordingLocalDataSourceInteface {
+    private let fileManager = FileManager.default
+    private lazy var docsDir: URL = {
+        fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+    }()
 
     func getRecordings() -> [Recording] {
-        let fileManager = FileManager.default
-        let directory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let urls = try? fileManager.contentsOfDirectory(
+            at: docsDir,
+            includingPropertiesForKeys: [.creationDateKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return []
+        }
 
-        let urls = (try? fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
+        let recordings = urls.compactMap { url -> Recording? in
+            guard url.pathExtension.lowercased() == "m4a" else { return nil }
+            let date = (try? url.resourceValues(forKeys: [.creationDateKey]))
+                .flatMap(\.creationDate) ?? Date()
+            let duration = getDuration(for: url)
+            let transcription = UserDefaults.standard
+                .string(forKey: "transcription_\(url.lastPathComponent)")
+            return Recording(
+                url: url,
+                date: date,
+                sequence: 0,
+                transcription: transcription,
+                duration: duration
+            )
+        }
 
-        return urls
-            .filter { $0.pathExtension == "m4a" }
-            .sorted(by: { lhs, rhs in
-                let lhsDate = (try? fileManager.attributesOfItem(atPath: lhs.path)[.creationDate] as? Date) ?? Date()
-                let rhsDate = (try? fileManager.attributesOfItem(atPath: rhs.path)[.creationDate] as? Date) ?? Date()
-                return lhsDate > rhsDate
-            })
-            .map { url in
-                let attributes = try? fileManager.attributesOfItem(atPath: url.path)
-                let date = (attributes?[.creationDate] as? Date) ?? Date()
-                let duration = getDuration(for: url)
-
-                let transcription = UserDefaults.standard.string(forKey: "transcription_\(url.lastPathComponent)")
-
-                return Recording(
-                    url: url,
-                    date: date,
-                    sequence: 0,
-                    transcription: transcription,
-                    duration: duration
-                )
-            }
+        return recordings.sorted { $0.date > $1.date }
     }
 
     func saveRecording(from url: URL, duration: TimeInterval) {
-        let fileName = url.lastPathComponent
-        print("Локально сохранено: \(fileName), длительность: \(duration) сек")
+        let destURL = docsDir.appendingPathComponent(url.lastPathComponent)
+        do {
+            if fileManager.fileExists(atPath: destURL.path) {
+                try fileManager.removeItem(at: destURL)
+            }
+            try fileManager.moveItem(at: url, to: destURL)
+        } catch {
+            print("Error saving recording: \(error.localizedDescription)")
+        }
+    }
+
+    func deleteRecording(url: URL) {
+        guard fileManager.fileExists(atPath: url.path) else {
+            print("File not found: \(url.path)")
+            return
+        }
+        do {
+            try fileManager.removeItem(at: url)
+            print("Deleted recording: \(url.lastPathComponent)")
+        } catch {
+            print("Error deleting recording at \(url.path): \(error.localizedDescription)")
+        }
     }
 
     private func getDuration(for url: URL) -> TimeInterval {
         let asset = AVURLAsset(url: url)
         return CMTimeGetSeconds(asset.duration)
     }
-
 }
-

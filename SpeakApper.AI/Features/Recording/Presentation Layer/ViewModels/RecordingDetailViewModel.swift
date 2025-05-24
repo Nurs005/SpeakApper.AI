@@ -1,4 +1,3 @@
-//
 //  RecordingDetailViewModel.swift
 //  SpeakApper.AI
 //
@@ -8,89 +7,127 @@
 import Foundation
 import AVFoundation
 import SwiftUI
+import Combine
 
+@MainActor
 final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate {
-    // MARK: - Published Properties
+    
+    // MARK: — Существующие @Published
     @Published var transcriptionText: String = ""
     @Published var audioTitle: String = "Аудиозапись"
     @Published var audioDuration: String = ""
     @Published var isPlaying: Bool = false
-    @Published var isTranscribing: Bool = true
+    @Published var isTranscribing: Bool = false
+    @Published var selectedLanguage: TranscriptionLanguage = .automatic
+    
+    // MARK: — Новые свойства для AI
+    @Published var aiResult: String? = nil
+    @Published var lastAIAction: String?           // текущий промт
+    private var previousTranscriptionText = ""     // текст до AI
+    @Published var isAILoading = false
+    @Published var aiError: String?
 
-    // MARK: - Private Properties
+    // MARK: — Зависимости и внутреннее состояние
+    private let transcriptionManager: TranscriptionManager
     private let recording: Recording
     private var audioPlayer: AVAudioPlayer?
-    private let transcriptionManager = TranscriptionManager()
-
-    // MARK: - Init
-    init(recording: Recording) {
+    private var transcriptionCancellable: AnyCancellable?
+    
+    init(
+        recording: Recording,
+        transcriptionManager: TranscriptionManager = .shared
+    ) {
         self.recording = recording
+        self.transcriptionManager = transcriptionManager
         super.init()
-        fetchTranscription()
-        fetchDuration()
-        setupPlayer()
-    }
-
-    // MARK: - URL for Sharing
-    var audioURL: URL {
-        recording.url
-    }
-
-    // MARK: - Transcription
-    func fetchTranscription() {
-        if let existing = recording.transcription, !existing.isEmpty {
-            transcriptionText = existing
-            audioTitle = Self.generateTitle(from: existing)
-            isTranscribing = false
-            return
-        }
-        transcriptionManager.transcribeAudio(url: recording.url) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.transcriptionText = result ?? ""
-                self.audioTitle = Self.generateTitle(from: result ?? "")
+        
+        audioTitle = Self.generateTitle(from: "Транскрибируется...")
+        transcriptionText = ""
+        
+        transcriptionCancellable = transcriptionManager.$transcriptions
+            .map { $0[recording.url] }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] maybeText in
+                guard let self = self, let text = maybeText else { return }
+                self.transcriptionText = text
+                self.audioTitle = Self.generateTitle(from: text)
                 self.isTranscribing = false
             }
+        
+        fetchDuration()
+        if transcriptionManager.transcriptions[recording.url] == nil {
+            fetchTranscription()
         }
+        setupPlayer()
     }
-
-    // MARK: - Audio Duration
+    
+    var audioURL: URL { recording.url }
+    
+    // MARK: — Транскрипция
+    func fetchTranscription() {
+        isTranscribing = true
+        
+        let callback: (String?) -> Void = { [weak self] text in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.isTranscribing = false
+                if let text = text, !text.isEmpty {
+                    self.transcriptionText = text
+                    self.audioTitle = Self.generateTitle(from: text)
+                } else {
+                    let placeholder = "Не удалось транскрибировать запись"
+                    self.transcriptionText = placeholder
+                    self.audioTitle = Self.generateTitle(from: placeholder)
+                }
+            }
+        }
+        
+        let locales = selectedLanguage == .automatic
+            ? ["ru-RU", "en-US"]
+            : [selectedLanguage.rawValue]
+        
+        transcriptionManager.transcribeAudioWithFallback(
+            url: recording.url,
+            locales: locales,
+            completion: callback
+        )
+    }
+    
+    func changeLanguage(to newLang: TranscriptionLanguage) {
+        selectedLanguage = newLang
+        fetchTranscription()
+    }
+    
+    // MARK: — Длительность
     func fetchDuration() {
         let asset = AVURLAsset(url: recording.url)
         Task {
-            do {
-                let duration = try await asset.load(.duration)
-                let seconds = CMTimeGetSeconds(duration)
-                let minutes = Int(seconds) / 60
-                let secs = Int(seconds) % 60
-                DispatchQueue.main.async {
-                    self.audioDuration = String(format: "%02d:%02d", minutes, secs)
-                }
-            } catch {
-                print("Ошибка получения длительности: \(error)")
+            if let durationValue = try? await asset.load(.duration) {
+                let seconds = CMTimeGetSeconds(durationValue)
+                let m = Int(seconds) / 60
+                let s = Int(seconds) % 60
+                self.audioDuration = String(format: "%02d:%02d", m, s)
             }
         }
     }
-
-    // MARK: - Player Setup
+    
+    // MARK: — Плеер
     private func setupPlayer() {
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .default, options: [.defaultToSpeaker])
+            try session.setCategory(.playback, mode: .default)
             try session.setActive(true)
-
+            
             audioPlayer = try AVAudioPlayer(contentsOf: recording.url)
             audioPlayer?.delegate = self
             audioPlayer?.enableRate = true
             audioPlayer?.rate = 1.0
-            audioPlayer?.volume = 1.0
             audioPlayer?.prepareToPlay()
         } catch {
-            print("Ошибка инициализации плеера: \(error)")
+            print("Ошибка плеера: \(error)")
         }
     }
-
-    // MARK: - Play / Pause
+    
     func togglePlayPause() {
         guard let player = audioPlayer else { return }
         if player.isPlaying {
@@ -102,23 +139,20 @@ final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerD
             isPlaying = true
         }
     }
-
+    
     func stopPlayback() {
         audioPlayer?.stop()
         isPlaying = false
     }
-
-    // MARK: - Playback Rate
+    
     func setPlaybackRate(_ newRate: Float) {
         guard let player = audioPlayer else { return }
         let wasPlaying = player.isPlaying
-        let currentTime = player.currentTime
-
+        let t = player.currentTime
         player.stop()
         player.enableRate = true
         player.rate = newRate
-        player.currentTime = currentTime
-
+        player.currentTime = t
         if wasPlaying {
             try? AVAudioSession.sharedInstance().setActive(true)
             player.play()
@@ -126,37 +160,183 @@ final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerD
             player.prepareToPlay()
         }
     }
-
-    // MARK: - Title Generator
-    static func generateTitle(from text: String) -> String {
-        text
-            .components(separatedBy: " ")
-            .prefix(4)
-            .joined(separator: " ")
-    }
-
-    // MARK: - Export Text
+    
+    // MARK: — Экспорт и шаринг
     func export(format: ExportFormat) {
-        guard !transcriptionText.isEmpty else {
-            print("Нет текста для экспорта")
-            return
-        }
+        guard !transcriptionText.isEmpty else { return }
         ExportManager.export(text: transcriptionText, format: format)
     }
-
-    // MARK: - Share Audio
+    
     func shareAudio() {
-        let activityVC = UIActivityViewController(
+        let av = UIActivityViewController(
             activityItems: [recording.url],
             applicationActivities: nil
         )
         UIApplication.shared.windows.first?
             .rootViewController?
-            .present(activityVC, animated: true)
+            .present(av, animated: true)
     }
 
-    // MARK: - AVAudioPlayerDelegate
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+    // MARK: — AVAudioPlayerDelegate
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer,
+                                     successfully flag: Bool) {
         stopPlayback()
     }
+    
+    // MARK: — Helpers
+    static func generateTitle(from text: String) -> String {
+        text.components(separatedBy: " ")
+            .prefix(4)
+            .joined(separator: " ")
+    }
+    
+    
+    // MARK: — AI интеграция
+//    func callAI(action: String) {
+//          guard !transcriptionText.isEmpty else { return }
+//          // сохраним предыдущее состояние
+//          previousTranscriptionText = transcriptionText
+//          lastAIAction = action
+//          aiError = nil
+//          isAILoading = true
+//
+//          guard let url = URL(string: "https://mystical-height-454513-u4.uc.r.appspot.com/v1/gateway/ai") else {
+//              aiError = "Неверный URL"
+//              isAILoading = false
+//              return
+//          }
+//          var req = URLRequest(url: url)
+//          req.httpMethod = "POST"
+//          req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//
+//          struct Payload: Encodable {
+//              let action: String
+//              let content: String
+//          }
+//          let payload = Payload(action: action, content: transcriptionText)
+//
+//          Task {
+//              do {
+//                  req.httpBody = try JSONEncoder().encode(payload)
+//                  let (data, resp) = try await URLSession.shared.data(for: req)
+//                  guard (resp as? HTTPURLResponse)?.statusCode == 200 else {
+//                      throw URLError(.badServerResponse)
+//                  }
+//                  struct AIResp: Decodable { let result: String }
+//                  let r = try JSONDecoder().decode(AIResp.self, from: data)
+//
+//                  // Обновляем на главном потоке
+//                  await MainActor.run {
+//                      self.transcriptionText = r.result
+//                  }
+//              } catch {
+//                  await MainActor.run {
+//                      self.aiError = error.localizedDescription
+//                  }
+//              }
+//              await MainActor.run {
+//                  self.isAILoading = false
+//              }
+//          }
+//      }
+    // Модель для разбора ответа OpenAI
+    private struct OpenAIResponse: Decodable {
+        struct Choice: Decodable {
+            struct Message: Decodable {
+                let content: String
+            }
+            let message: Message
+        }
+        let choices: [Choice]
+    }
+
+    @MainActor
+    func callAI(action: String) {
+        // 1. Првоеряем, что есть текст
+        guard !transcriptionText.isEmpty else {
+            print("callAI: transcriptionText пустой — выходим")
+            return
+        }
+        print("callAI: отправляем action = \(action)")
+        print("    content prefix = \(transcriptionText.prefix(80))…")
+
+        // 2. Сохраняем состояние и включаем индикатор
+        previousTranscriptionText = transcriptionText
+        lastAIAction = action
+        aiError = nil
+        isAILoading = true
+
+        // 3. Запускаем асинхронно
+        Task {
+            await performCallAI(action: action)
+        }
+    }
+
+    @MainActor
+    private func performCallAI(action: String) async {
+        // 4. Подготовка запроса
+        guard let url = URL(string: "https://mystical-height-454513-u4.uc.r.appspot.com/v1/gateway/ai") else {
+            aiError = "Неверный URL"
+            isAILoading = false
+            return
+        }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        struct Payload: Encodable { let action: String; let content: String }
+        do {
+            req.httpBody = try JSONEncoder().encode(Payload(action: action, content: transcriptionText))
+        } catch {
+            aiError = "Ошибка кодирования запроса: \(error)"
+            isAILoading = false
+            return
+        }
+
+        // 5. Выполняем запрос
+        do {
+            let (data, response) = try await URLSession.shared.data(for: req)
+            let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+            print("callAI: status = \(status), bytes = \(data.count)")
+
+            guard status == 200 else {
+                throw URLError(.badServerResponse)
+            }
+
+            // 6. Печатаем сырой JSON для отладки
+            if let raw = String(data: data, encoding: .utf8) {
+                print("raw JSON:\n\(raw)")
+            }
+
+            // 7. Декодируем в наш формат
+            let decoded = try JSONDecoder().decode(OpenAIResponse.self, from: data)
+            guard let content = decoded.choices.first?.message.content else {
+                throw URLError(.cannotParseResponse)
+            }
+            print("callAI: получили контент длиной \(content.count)")
+
+            // 8. Обновляем текст
+            transcriptionText = content
+        } catch {
+            // 9. Обработка ошибки
+            aiError = error.localizedDescription
+            print("callAI: ошибка — \(error)")
+        }
+
+        // 10. Выключаем индикатор
+        isAILoading = false
+    }
+
+      func undoAI() {
+          guard lastAIAction != nil else { return }
+          transcriptionText = previousTranscriptionText
+          lastAIAction = nil
+      }
+
+      func redoAI() {
+          guard let action = lastAIAction else { return }
+          callAI(action: action)
+      }
+    
+ 
+
 }

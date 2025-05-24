@@ -19,6 +19,7 @@ final class AudioRecorder: NSObject, ObservableObject {
     
     private(set) var lastRecordedURL: URL?
     private(set) var lastRecordedDuration: TimeInterval?
+    var onFinishRecording: (() -> Void)?
     
     var onFinishPlaying: (() -> Void)?
     
@@ -30,9 +31,7 @@ final class AudioRecorder: NSObject, ObservableObject {
     // MARK: - Start
     func startRecording() {
         let fileName = UUID().uuidString + ".m4a"
-        //let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
-        let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let url = directory.appendingPathComponent(fileName)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
         
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -58,20 +57,24 @@ final class AudioRecorder: NSObject, ObservableObject {
     }
     
     // MARK: - Stop
-    func stopRecording() {
+    func stopRecording(delete: Bool = false) {
         audioRecorder?.stop()
         stopMeterTimer()
         
-        guard let recorder = audioRecorder else { return }
+        guard !delete, let recorder = audioRecorder else { return }
+        
         let url = recorder.url
         let duration = getDuration(for: url)
         
         lastRecordedURL = url
         lastRecordedDuration = duration
         
-        // Сохраняем через UseCase
         useCase.saveRecording(from: url, duration: duration)
         print("Сохранено через UseCase: \(url.lastPathComponent), \(Int(duration)) сек")
+        
+        DispatchQueue.main.async {
+            self.onFinishRecording?()
+        }
     }
     
     // MARK: - Pause / Resume

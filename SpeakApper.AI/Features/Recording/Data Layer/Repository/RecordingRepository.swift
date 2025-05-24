@@ -10,6 +10,7 @@ import Foundation
 protocol RecordingRepositoryInterface: AnyObject {
     func getRecordings() -> [Recording]
     func saveRecording(from url: URL, duration: TimeInterval)
+    func deleteRecording(url: URL)
 }
 
 final class RecordingRepository {
@@ -28,5 +29,9 @@ extension RecordingRepository: RecordingRepositoryInterface {
     func saveRecording(from url: URL, duration: TimeInterval) {
         localDataSource.saveRecording(from: url, duration: duration)
     }
+    
+    public func deleteRecording(url: URL) {
+        localDataSource.deleteRecording(url: url)
+        }
    
 }

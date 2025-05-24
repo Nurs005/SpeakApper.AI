@@ -16,25 +16,25 @@ struct RecordingView: View {
     @State private var timer: Timer? = nil
     @State private var isPaused = false
     @State private var hasStopped = false
-
+    
     let maxRecordingDuration: TimeInterval = 120
     
     var body: some View {
         ZStack {
             Color("BackgroundColor").ignoresSafeArea()
-
+            
             VStack(spacing: 24) {
-                AudioWaveFormView(audioLevels: viewModel.audioRecorder.audioLevels.map { CGFloat($0) })
+                AudioWaveFormView(audioLevels: viewModel.audioLevels.map { CGFloat($0) })
                     .frame(height: 150)
                     .padding(.top, 60)
-
+                
                 Spacer()
-
+                
                 timerView
-
+                
                 buyPremiumView
                     .padding(.bottom, 72)
-
+                
                 controlsView
                     .padding(.bottom, 24)
             }
@@ -58,7 +58,7 @@ extension RecordingView {
         }
         .font(.system(size: 53, weight: .bold))
     }
-
+    
     var buyPremiumView: some View {
         HStack(spacing: 4) {
             Image(.premiumLightning)
@@ -77,7 +77,7 @@ extension RecordingView {
         )
         .cornerRadius(10)
     }
-
+    
     var controlsView: some View {
         HStack(spacing: 32) {
             micControlButton(
@@ -87,7 +87,7 @@ extension RecordingView {
             ) {
                 stopRecording(delete: true)
             }
-
+            
             micControlButton(
                 imageName: "stop",
                 text: "Сохранить",
@@ -95,7 +95,7 @@ extension RecordingView {
             ) {
                 stopRecording(delete: false)
             }
-
+            
             micControlButton(
                 imageName: isPaused ? "mic.fill" : "pause",
                 text: isPaused ? "Возобновить" : "Пауза",
@@ -106,7 +106,7 @@ extension RecordingView {
         }
         .frame(maxWidth: .infinity)
     }
-
+    
     func micControlButton(
         imageName: String,
         text: String,
@@ -128,7 +128,7 @@ extension RecordingView {
                         .frame(width: size * 0.38, height: size * 0.38)
                         .foregroundColor(iconColor)
                 }
-
+                
                 Text(text)
                     .font(.caption)
                     .foregroundColor(Color(hex: "#7B7A94"))
@@ -143,22 +143,21 @@ extension RecordingView {
         viewModel.audioRecorder.startRecording()
         startTimer()
     }
-
+    
     func stopRecording(delete: Bool) {
         guard !hasStopped else { return }
         hasStopped = true
-
-        viewModel.audioRecorder.stopRecording()
-
+        
+        viewModel.audioRecorder.stopRecording(delete: delete)
+        
         if delete,
            let url = viewModel.audioRecorder.lastRecordedURL {
             viewModel.audioRecorder.deleteRecording(url: url)
-        } else {
-            viewModel.handleSaveLastRecording()
         }
+        
         coordinator.pop()
     }
-
+    
     func togglePause() {
         isPaused.toggle()
         if isPaused {
@@ -169,7 +168,7 @@ extension RecordingView {
             startTimer()
         }
     }
-
+    
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             if recordingTime < maxRecordingDuration {
@@ -179,10 +178,11 @@ extension RecordingView {
             }
         }
     }
-
+    
     func formatTime(_ time: TimeInterval) -> String {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
         return String(format: "%01d:%02d", minutes, seconds)
     }
 }
+

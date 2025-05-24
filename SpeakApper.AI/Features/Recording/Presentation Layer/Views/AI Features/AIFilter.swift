@@ -7,28 +7,20 @@
 
 import Foundation
 
-struct AIFilter: Identifiable, Codable, Equatable {
-    let id: UUID
-    var title: String
-    var category: FilterCategory
-    
-    enum FilterCategory: String, Codable, CaseIterable, Identifiable {
+struct AIFilter: Identifiable, Equatable {
+    let id = UUID()
+    let category: FilterCategory
+
+    enum FilterCategory: String, CaseIterable, Identifiable {
         case favorites = ""
         case action    = "Действие"
         case style     = "Стиль"
         case tone      = "Тон"
         case fun       = "Весело"
         case custom    = "Свой"
-        
+
         var id: Self { self }
-        
-        var iconName: String? {
-            switch self {
-                case .favorites: return "star"
-                default:         return nil
-            }
-        }
-        
+        var iconName: String? { self == .favorites ? "star" : nil }
         var displayTitle: String { rawValue }
     }
 }

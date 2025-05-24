@@ -36,6 +36,7 @@ fileprivate extension RecordingItemView {
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(.recordingItem)
+        .padding(.vertical, 8)
         )
     }
     
