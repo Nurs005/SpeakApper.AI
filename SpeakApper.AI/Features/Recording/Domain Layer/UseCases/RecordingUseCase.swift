@@ -39,4 +39,12 @@ extension RecordingUseCase: RecordingUseCaseProtocol {
     public func deleteRecording(url: URL) {
         repository.deleteRecording(url: url)
     }
+    
+    func deleteAllRecordings() {
+        repository.deleteAllRecordings()
+    }
+
+    func cacheSize() -> Int {
+        repository.cacheSize()
+    }
 }

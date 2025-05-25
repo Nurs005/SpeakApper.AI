@@ -11,6 +11,8 @@ protocol RecordingRepositoryInterface: AnyObject {
     func getRecordings() -> [Recording]
     func saveRecording(from url: URL, duration: TimeInterval)
     func deleteRecording(url: URL)
+    func deleteAllRecordings()
+    func cacheSize() -> Int
 }
 
 final class RecordingRepository {
@@ -32,6 +34,14 @@ extension RecordingRepository: RecordingRepositoryInterface {
     
     public func deleteRecording(url: URL) {
         localDataSource.deleteRecording(url: url)
-        }
-   
+    }
+    
+    func deleteAllRecordings() {
+        try? localDataSource.deleteAllRecordings()
+    }
+    
+    func cacheSize() -> Int {
+        localDataSource.cacheSize()
+    }
+    
 }

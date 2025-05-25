@@ -19,17 +19,14 @@ final class TranscriptionManager: ObservableObject {
         loadCachedTranscriptions()
     }
     
-    // MARK: — Универсальный метод (fallback если language = "")
     func transcribeAudio(
         url: URL,
         language: String = "",
         completion: @escaping (String?) -> Void
     ) {
         if language.isEmpty {
-            // сначала en-US, потом ru-RU
             transcribeAudioWithFallback(url: url, completion: completion)
         } else {
-            // если указан язык — только он
             transcribeAudioWithFallback(
                 url: url,
                 locales: [language],
@@ -45,10 +42,10 @@ final class TranscriptionManager: ObservableObject {
         }
     }
     
-    // MARK: — Fallback между локалями (дефолтный порядок поменяли)
+    // MARK: — Fallback между локалями 
     func transcribeAudioWithFallback(
         url: URL,
-        locales: [String] = ["en-US", "ru-RU"],   // ← здесь порядок EN, RU
+        locales: [String] = ["en-US", "ru-RU"],
         completion: @escaping (String?) -> Void
     ) {
         guard !locales.isEmpty else {
@@ -56,12 +53,10 @@ final class TranscriptionManager: ObservableObject {
         }
         let locale = locales[0]
         transcribeAudioSingle(url: url, languageCode: locale) { [weak self] text in
-            // если есть осмысленный результат — возвращаем его
             if let text = text?.trimmingCharacters(in: .whitespacesAndNewlines),
                !text.isEmpty {
                 return completion(text)
             }
-            // иначе пробуем следующую локаль
             let remaining = Array(locales.dropFirst())
             self?.transcribeAudioWithFallback(
                 url: url,
@@ -77,12 +72,10 @@ final class TranscriptionManager: ObservableObject {
         languageCode: String,
         completion: @escaping (String?) -> Void
     ) {
-        // кэш
         if let cached = transcriptions[url] {
             print("Кэш для \(url.lastPathComponent)")
             return DispatchQueue.main.async { completion(cached) }
         }
-        // права
         guard SFSpeechRecognizer.authorizationStatus() == .authorized else {
             return SFSpeechRecognizer.requestAuthorization { [weak self] status in
                 DispatchQueue.main.async {
@@ -99,24 +92,19 @@ final class TranscriptionManager: ObservableObject {
                 }
             }
         }
-        // создаём распознаватель
         let recognizer = SFSpeechRecognizer(locale: Locale(identifier: languageCode))
         guard let rec = recognizer, rec.isAvailable else {
             print("SpeechRecognizer недоступен для \(languageCode)")
             return DispatchQueue.main.async { completion(nil) }
         }
-        // завершаем AV-сессию, чтобы открыть файл
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         
-        // запрос
         let request = SFSpeechURLRecognitionRequest(url: url)
         request.shouldReportPartialResults = false
         
-        // отменяем старую задачу
         recognitionTask?.cancel()
         recognitionTask = nil
         
-        // новая задача
         recognitionTask = rec.recognitionTask(with: request) { [weak self] result, error in
             if let err = error as NSError? {
                 print("Ошибка распознавания [\(err.code)]: \(err.localizedDescription)")

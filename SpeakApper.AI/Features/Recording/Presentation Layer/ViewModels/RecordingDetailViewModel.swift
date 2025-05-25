@@ -22,8 +22,8 @@ final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerD
     
     // MARK: — Новые свойства для AI
     @Published var aiResult: String? = nil
-    @Published var lastAIAction: String?           // текущий промт
-    private var previousTranscriptionText = ""     // текст до AI
+    @Published var lastAIAction: String?           
+    private var previousTranscriptionText = ""
     @Published var isAILoading = false
     @Published var aiError: String?
 
@@ -192,54 +192,6 @@ final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerD
     
     
     // MARK: — AI интеграция
-//    func callAI(action: String) {
-//          guard !transcriptionText.isEmpty else { return }
-//          // сохраним предыдущее состояние
-//          previousTranscriptionText = transcriptionText
-//          lastAIAction = action
-//          aiError = nil
-//          isAILoading = true
-//
-//          guard let url = URL(string: "https://mystical-height-454513-u4.uc.r.appspot.com/v1/gateway/ai") else {
-//              aiError = "Неверный URL"
-//              isAILoading = false
-//              return
-//          }
-//          var req = URLRequest(url: url)
-//          req.httpMethod = "POST"
-//          req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//
-//          struct Payload: Encodable {
-//              let action: String
-//              let content: String
-//          }
-//          let payload = Payload(action: action, content: transcriptionText)
-//
-//          Task {
-//              do {
-//                  req.httpBody = try JSONEncoder().encode(payload)
-//                  let (data, resp) = try await URLSession.shared.data(for: req)
-//                  guard (resp as? HTTPURLResponse)?.statusCode == 200 else {
-//                      throw URLError(.badServerResponse)
-//                  }
-//                  struct AIResp: Decodable { let result: String }
-//                  let r = try JSONDecoder().decode(AIResp.self, from: data)
-//
-//                  // Обновляем на главном потоке
-//                  await MainActor.run {
-//                      self.transcriptionText = r.result
-//                  }
-//              } catch {
-//                  await MainActor.run {
-//                      self.aiError = error.localizedDescription
-//                  }
-//              }
-//              await MainActor.run {
-//                  self.isAILoading = false
-//              }
-//          }
-//      }
-    // Модель для разбора ответа OpenAI
     private struct OpenAIResponse: Decodable {
         struct Choice: Decodable {
             struct Message: Decodable {
@@ -252,21 +204,16 @@ final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerD
 
     @MainActor
     func callAI(action: String) {
-        // 1. Првоеряем, что есть текст
         guard !transcriptionText.isEmpty else {
             print("callAI: transcriptionText пустой — выходим")
             return
         }
         print("callAI: отправляем action = \(action)")
         print("    content prefix = \(transcriptionText.prefix(80))…")
-
-        // 2. Сохраняем состояние и включаем индикатор
         previousTranscriptionText = transcriptionText
         lastAIAction = action
         aiError = nil
         isAILoading = true
-
-        // 3. Запускаем асинхронно
         Task {
             await performCallAI(action: action)
         }
@@ -274,7 +221,6 @@ final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerD
 
     @MainActor
     private func performCallAI(action: String) async {
-        // 4. Подготовка запроса
         guard let url = URL(string: "https://mystical-height-454513-u4.uc.r.appspot.com/v1/gateway/ai") else {
             aiError = "Неверный URL"
             isAILoading = false
@@ -292,7 +238,6 @@ final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerD
             return
         }
 
-        // 5. Выполняем запрос
         do {
             let (data, response) = try await URLSession.shared.data(for: req)
             let status = (response as? HTTPURLResponse)?.statusCode ?? -1
@@ -301,28 +246,23 @@ final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerD
             guard status == 200 else {
                 throw URLError(.badServerResponse)
             }
-
-            // 6. Печатаем сырой JSON для отладки
+            
             if let raw = String(data: data, encoding: .utf8) {
                 print("raw JSON:\n\(raw)")
             }
-
-            // 7. Декодируем в наш формат
+            
             let decoded = try JSONDecoder().decode(OpenAIResponse.self, from: data)
             guard let content = decoded.choices.first?.message.content else {
                 throw URLError(.cannotParseResponse)
             }
             print("callAI: получили контент длиной \(content.count)")
 
-            // 8. Обновляем текст
             transcriptionText = content
         } catch {
-            // 9. Обработка ошибки
             aiError = error.localizedDescription
             print("callAI: ошибка — \(error)")
         }
 
-        // 10. Выключаем индикатор
         isAILoading = false
     }
 
@@ -336,7 +276,5 @@ final class RecordingDetailViewModel: NSObject, ObservableObject, AVAudioPlayerD
           guard let action = lastAIAction else { return }
           callAI(action: action)
       }
-    
- 
 
 }

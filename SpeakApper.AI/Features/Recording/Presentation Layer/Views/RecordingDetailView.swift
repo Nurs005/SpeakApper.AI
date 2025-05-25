@@ -55,6 +55,7 @@ struct RecordingDetailView: View {
     @State private var showCopiedAlert = false
     @State private var showAIActions = false
     @State private var showLanguagePicker = false
+    @State private var showOptionsMenu = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -84,9 +85,9 @@ struct RecordingDetailView: View {
             ActivityView(activityItems: [viewModel.audioURL])
         }
         .sheet(isPresented: $showAIActions) {
-        AIActionView(viewModel: viewModel)
-            .presentationDetents([.medium])
-            .presentationBackground(Color.black.opacity(0.4))
+            AIActionView(viewModel: viewModel)
+                .presentationDetents([.medium])
+                .presentationBackground(Color.black.opacity(0.4))
         }
         .sheet(isPresented: $showLanguagePicker) {
             LanguagePickerView(
@@ -179,11 +180,12 @@ struct RecordingDetailView: View {
                     .foregroundColor(.white)
                     .padding(.vertical, 8)
                     .padding(.horizontal, 4)
+                
             }
         }
+        .background(Color(hex: "#292A33"))
         .padding(.horizontal, 16)
         .frame(height: 48)
-        .background(Color(hex: "#292A33"))
         .cornerRadius(12)
     }
     
@@ -280,16 +282,16 @@ struct RecordingDetailView: View {
                         .frame(minHeight: 420)
                 }
                 
-//                HStack(spacing: 20) {
-//                    Image(systemName: "arrow.clockwise")
-//                }
-//                .font(.system(size: 14))
-//                .foregroundColor(.gray)
+                //                HStack(spacing: 20) {
+                //                    Image(systemName: "arrow.clockwise")
+                //                }
+                //                .font(.system(size: 14))
+                //                .foregroundColor(.gray)
                 
             }
             .padding(.horizontal)
         }
-       
+        
     }
     
     // MARK: — Bottom Bar: AI / Copy / Export

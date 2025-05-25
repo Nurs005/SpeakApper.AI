@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @Environment(Coordinator.self) var coordinator
+    @State private var showAlert = false
     
     var body: some View {
         ZStack {
@@ -146,24 +147,27 @@ fileprivate extension SettingsView {
     }
     
     var dataManagementSection: some View {
-        Section(header: Text("Управление данными").textCase(nil).foregroundColor(.gray)) {
-            Button(action: {
-                // TODO: Реализовать логику удаления записей
-            }) {
+        Section(header: Text("Управление данными").foregroundColor(.gray)) {
+            Button(role: .destructive) { showAlert = true } label: {
                 HStack(spacing: 16) {
                     Image(systemName: "trash")
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(.white)
+                        .resizable().frame(width: 24, height: 24)
                     Text("Удалить все записи")
-                        .foregroundColor(.white)
                     Spacer()
-                    Text("(150 KB)")
+                    Text(viewModel.cacheSizeString)
                         .foregroundColor(.gray)
                 }
+                .foregroundColor(.white)
             }
         }
-        .listRowBackground(Color("listColor"))
+        .alert("Удалить все записи?",
+               isPresented: $showAlert) {
+            Button("Удалить", role: .destructive) {
+                viewModel.deleteAll()
+            }
+            Button("Отмена", role: .cancel) { }
+        }
+               .listRowBackground(Color("listColor"))
     }
     
 }

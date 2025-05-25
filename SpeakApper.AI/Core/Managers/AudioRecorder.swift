@@ -131,11 +131,29 @@ final class AudioRecorder: NSObject, ObservableObject {
         return CMTimeGetSeconds(asset.duration)
     }
     
+    private func normalizedPowerLevel(from decibels: Float) -> Float {
+        let minDb: Float = -60
+        if decibels < minDb {
+            return 0
+        }
+        return (decibels + abs(minDb)) / abs(minDb)
+    }
+    
     private func startMeterTimer() {
-        meterTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            self.audioRecorder?.updateMeters()
-            let level = self.audioRecorder?.averagePower(forChannel: 0) ?? -160
-            self.audioLevels.append(level)
+        audioRecorder?.isMeteringEnabled = true
+        meterTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
+            guard let recorder = self.audioRecorder else { return }
+            recorder.updateMeters()
+            
+            let power = recorder.averagePower(forChannel: 0)
+            let normalized = self.normalizedPowerLevel(from: power)
+            
+            DispatchQueue.main.async {
+                self.audioLevels.append(normalized)
+                if self.audioLevels.count > 30 {
+                    self.audioLevels.removeFirst()
+                }
+            }
         }
     }
     

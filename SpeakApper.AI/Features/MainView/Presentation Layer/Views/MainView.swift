@@ -13,32 +13,39 @@ struct MainView: View {
     
     @State private var isSearching = false
     @FocusState private var searchFieldIsFocused: Bool
-
+    
     @State private var itemToDelete: RecordingItemViewModel?
     @State private var showingDeleteAlert = false
-
+    
     var body: some View {
         VStack(spacing: 16) {
             headerView
-
+            
             searchBarView
-
+            
             if !viewModel.hasSubscription {
                 buyPremiumView
             }
-
+            
             quickActionsView
                 .padding(.vertical, 16)
-
+            
             recordingsView
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)
         .background(Color(.background).ignoresSafeArea())
         .overlay(alignment: .bottom) {
-            startRecordingButtonView
-                .padding(.bottom, 30)
+            VStack(spacing: 38) {
+                if viewModel.recordingItemsViewModels.isEmpty {
+                    recordingTipView
+                        .padding(.horizontal, 16)
+                }
+                startRecordingButtonView
+            }
+            .padding(.bottom, 30)
         }
+        
         .alert("Удалить запись?", isPresented: $showingDeleteAlert, presenting: itemToDelete) { item in
             Button("Удалить", role: .destructive) {
                 viewModel.delete(item)
@@ -61,35 +68,22 @@ fileprivate extension MainView {
         }
     }
     
-//    var searchBarView: some View {
-//        HStack(spacing: 16) {
-//            Image(.mangnifyingglass)
-//            TextField("", text: $viewModel.searchText, prompt: Text("Поиск").foregroundColor(.white))
-//                .font(.system(size: 17))
-//                .foregroundColor(.white)
-//        }
-//        .padding(.horizontal, 16)
-//        .frame(height: 54)
-//        .background(Color("searchColor"))
-//        .cornerRadius(10)
-//    }
-    
     var searchBarView: some View {
-           NavigationLink(destination: SearchView(viewModel: viewModel)) {
-               HStack(spacing: 16) {
-                   Image(.mangnifyingglass)
-                       .foregroundColor(.white.opacity(0.7))
-                   Text("Поиск")
-                       .foregroundColor(.white.opacity(0.7))
-                   Spacer()
-               }
-               .padding(.vertical, 12)
-               .padding(.horizontal, 16)
-               .background(Color("searchColor"))
-               .cornerRadius(10)
-           }
-           .buttonStyle(.plain)
-       }
+        NavigationLink(destination: SearchView(viewModel: viewModel)) {
+            HStack(spacing: 16) {
+                Image(.mangnifyingglass)
+                    .foregroundColor(.white.opacity(0.7))
+                Text("Поиск")
+                    .foregroundColor(.white.opacity(0.7))
+                Spacer()
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .background(Color("searchColor"))
+            .cornerRadius(10)
+        }
+        .buttonStyle(.plain)
+    }
     
     
     var buyPremiumView: some View {
@@ -162,17 +156,6 @@ fileprivate extension MainView {
         .onAppear { viewModel.reloadRecordings() }
     }
     
-    var startRecordingButtonView: some View {
-        Button { coordinator.push(.recording) } label: {
-            Image(.startRecordingButton)
-                .overlay(alignment: .bottom) {
-                    Image(.startRecordingButtonTip)
-                        .offset(x: 0, y: 24)
-                }
-        }
-    }
-    
-    
     var recordingTipView: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Начните запись")
@@ -195,4 +178,19 @@ fileprivate extension MainView {
                 )
         )
     }
+    
+    var startRecordingButtonView: some View {
+        Button { coordinator.push(.recording) } label: {
+            Image(.startRecordingButton)
+                .overlay(alignment: .bottom) {
+                    Image(.startRecordingButtonTip)
+                        .offset(x: 0, y: 24)
+                }
+        }
+    }
+    
+    var startRecordingButtonTipView: some View {
+        Image(.startRecordingButtonTip)
+    }
+    
 }

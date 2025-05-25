@@ -24,9 +24,9 @@ struct RecordingView: View {
             Color("BackgroundColor").ignoresSafeArea()
             
             VStack(spacing: 24) {
-                AudioWaveFormView(audioLevels: viewModel.audioLevels.map { CGFloat($0) })
-                    .frame(height: 150)
-                    .padding(.top, 60)
+                AudioWaveformView(audioLevels: viewModel.audioRecorder.audioLevels.map { CGFloat($0) })
+                    .frame(maxWidth: .infinity)
+                  //  .padding(.horizontal, 16)
                 
                 Spacer()
                 
@@ -40,6 +40,8 @@ struct RecordingView: View {
             }
             .padding(.horizontal, 16)
         }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true) 
         .onAppear { startRecording() }
         .onDisappear { stopRecording(delete: false) }
     }

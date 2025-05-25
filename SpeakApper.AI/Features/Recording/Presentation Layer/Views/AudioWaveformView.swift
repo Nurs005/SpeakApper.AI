@@ -7,41 +7,20 @@
 
 import SwiftUI
 
-struct AudioWaveFormView: View {
-    let audioLevels: [CGFloat]
-
-    private let barWidth: CGFloat = 2
-    private let barSpacing: CGFloat = 2
-    private let minHeight: CGFloat = 6
-    private let maxHeight: CGFloat = 100
-    private let barCornerRadius: CGFloat = 3
+struct AudioWaveformView: View {
+    var audioLevels: [CGFloat]
 
     var body: some View {
-        GeometryReader { geometry in
-            let availableWidth = geometry.size.width
-            let totalSpacing = barSpacing * CGFloat(audioLevels.count - 1)
-           // let adjustedBarWidth = (availableWidth - totalSpacing) / CGFloat(audioLevels.count)
-
-            HStack(alignment: .center, spacing: barSpacing) {
-                ForEach(audioLevels.indices, id: \.self) { index in
-                    let level = audioLevels[index].clamped(to: 0.05...1.0)
-                    let height = max(level * maxHeight, minHeight)
-
-                    RoundedRectangle(cornerRadius: barCornerRadius)
-                        .fill(Color(hex: "#454358"))
-                        //.frame(width: adjustedBarWidth, height: height)
-                        .animation(.easeInOut(duration: 0.15), value: level)
-                }
+        HStack(spacing: 4) {
+            ForEach(0..<audioLevels.count, id: \.self) { index in
+                Capsule()
+                    .fill(Color.purple.opacity(0.8))
+                    .frame(width: 4, height: max(CGFloat(audioLevels[index]) * 100, 4))
+                    .animation(.easeInOut(duration: 0.2), value: audioLevels[index])
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(height: maxHeight)
-        .padding(.horizontal, 12)
-    }
-}
-
-extension Comparable {
-    func clamped(to limits: ClosedRange<Self>) -> Self {
-        return min(max(self, limits.lowerBound), limits.upperBound)
+        .padding(.vertical, 16)
+        .padding(.horizontal, 16)
+        .frame(height: 160)
     }
 }

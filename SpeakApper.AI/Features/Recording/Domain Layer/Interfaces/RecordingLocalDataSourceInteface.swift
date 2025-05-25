@@ -10,5 +10,7 @@ import Foundation
 protocol RecordingLocalDataSourceInteface: AnyObject {
     func getRecordings() -> [Recording]
     func saveRecording(from url: URL, duration: TimeInterval)
-    func deleteRecording(url: URL) 
+    func deleteRecording(url: URL)
+    func deleteAllRecordings() throws
+    func cacheSize() -> Int
 }

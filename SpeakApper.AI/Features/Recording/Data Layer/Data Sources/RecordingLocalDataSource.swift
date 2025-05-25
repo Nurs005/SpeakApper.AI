@@ -13,7 +13,7 @@ final class RecordingLocalDataSource: RecordingLocalDataSourceInteface {
     private lazy var docsDir: URL = {
         fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
     }()
-
+    
     func getRecordings() -> [Recording] {
         guard let urls = try? fileManager.contentsOfDirectory(
             at: docsDir,
@@ -22,7 +22,7 @@ final class RecordingLocalDataSource: RecordingLocalDataSourceInteface {
         ) else {
             return []
         }
-
+        
         let recordings = urls.compactMap { url -> Recording? in
             guard url.pathExtension.lowercased() == "m4a" else { return nil }
             let date = (try? url.resourceValues(forKeys: [.creationDateKey]))
@@ -38,10 +38,10 @@ final class RecordingLocalDataSource: RecordingLocalDataSourceInteface {
                 duration: duration
             )
         }
-
+        
         return recordings.sorted { $0.date > $1.date }
     }
-
+    
     func saveRecording(from url: URL, duration: TimeInterval) {
         let destURL = docsDir.appendingPathComponent(url.lastPathComponent)
         do {
@@ -53,7 +53,7 @@ final class RecordingLocalDataSource: RecordingLocalDataSourceInteface {
             print("Error saving recording: \(error.localizedDescription)")
         }
     }
-
+    
     func deleteRecording(url: URL) {
         guard fileManager.fileExists(atPath: url.path) else {
             print("File not found: \(url.path)")
@@ -66,9 +66,29 @@ final class RecordingLocalDataSource: RecordingLocalDataSourceInteface {
             print("Error deleting recording at \(url.path): \(error.localizedDescription)")
         }
     }
-
+    
     private func getDuration(for url: URL) -> TimeInterval {
         let asset = AVURLAsset(url: url)
         return CMTimeGetSeconds(asset.duration)
+    }
+    
+    func deleteAllRecordings() throws {
+        let urls = try fileManager.contentsOfDirectory(at: docsDir,
+                                                       includingPropertiesForKeys: nil,
+                                                       options: [.skipsHiddenFiles])
+        for url in urls where url.pathExtension.lowercased() == "m4a" {
+            try fileManager.removeItem(at: url)
+            UserDefaults.standard.removeObject(forKey: "transcription_\(url.lastPathComponent)")
+        }
+    }
+    
+    func cacheSize() -> Int {
+        (try? fileManager.contentsOfDirectory(at: docsDir,
+                                              includingPropertiesForKeys: [.fileSizeKey],
+                                              options: [.skipsHiddenFiles]))?
+            .reduce(0) { total, url in
+                let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+                return total + size
+            } ?? 0
     }
 }
