@@ -13,4 +13,6 @@ protocol RecordingLocalDataSourceInteface: AnyObject {
     func deleteRecording(url: URL)
     func deleteAllRecordings() throws
     func cacheSize() -> Int
+    
+    func updateTranscription(for url: URL, with text: String)
 }

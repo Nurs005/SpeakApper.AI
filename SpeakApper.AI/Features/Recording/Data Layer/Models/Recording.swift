@@ -8,7 +8,7 @@
 import Foundation
 
 struct Recording: Identifiable, Equatable, Hashable {
-    let id = UUID()
+    var id: String { url.lastPathComponent }
     let url: URL
     let date: Date
     let sequence: Int

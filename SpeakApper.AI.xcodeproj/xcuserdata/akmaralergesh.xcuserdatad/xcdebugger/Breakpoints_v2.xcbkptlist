@@ -56,18 +56,13 @@
             symbolName = "*0x10209d508">
             <Locations>
                <Location
-                  uuid = "E5E8F59E-4895-4F54-B442-28D837C44741 - 6a67eaadd29bc23f"
+                  uuid = "E5E8F59E-4895-4F54-B442-28D837C44741 - 2046cc150ca108e1"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "SpeakApper_AI.RecordingViewModel.bindTranscriptions() -&gt; ()"
-                  moduleName = "SpeakApper.AI"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///%3Ccompiler-generated%3E"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "0"
-                  endingLineNumber = "0">
+                  symbolName = "dyld3::MachOAnalyzer::forEachIndirectPointer(Diagnostics&amp;, bool, void (unsigned long long, bool, int, char const*, bool, bool, bool, bool&amp;) block_pointer) const"
+                  moduleName = "dyld"
+                  usesParentBreakpointCondition = "Yes">
                </Location>
             </Locations>
          </BreakpointContent>

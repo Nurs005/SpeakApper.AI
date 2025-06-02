@@ -13,6 +13,8 @@ protocol RecordingRepositoryInterface: AnyObject {
     func deleteRecording(url: URL)
     func deleteAllRecordings()
     func cacheSize() -> Int
+    
+    func updateTranscription(for url: URL, with text: String)
 }
 
 final class RecordingRepository {
@@ -42,6 +44,10 @@ extension RecordingRepository: RecordingRepositoryInterface {
     
     func cacheSize() -> Int {
         localDataSource.cacheSize()
+    }
+    
+    func updateTranscription(for url: URL, with text: String) {
+        localDataSource.updateTranscription(for: url, with: text)
     }
     
 }

@@ -91,4 +91,10 @@ final class RecordingLocalDataSource: RecordingLocalDataSourceInteface {
                 return total + size
             } ?? 0
     }
+    
+    // MARK: - Обновление транскрипции (UserDefaults)
+    func updateTranscription(for url: URL, with text: String) {
+        let key = "transcription_\(url.lastPathComponent)"
+        UserDefaults.standard.set(text, forKey: key)
+    }
 }

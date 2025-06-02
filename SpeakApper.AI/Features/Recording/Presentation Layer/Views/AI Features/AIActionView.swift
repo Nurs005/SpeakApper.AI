@@ -1,9 +1,9 @@
+//
 //  AIActionView.swift
 //  SpeakApper.AI
 //
 //  Created by Akmaral Ergesh on 27.04.2025.
 //
-
 
 import SwiftUI
 
@@ -18,38 +18,35 @@ struct AIActionView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // 1) Drag-indicator
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.white.opacity(0.7))
-                    .frame(width: 36, height: 4)
-                    .padding(.vertical, 8)
 
-                // 2) Tabs bar
                 tabsView
-                Divider().background(Color.white.opacity(0.15))
+                Divider()
+                    .background(Color.white.opacity(0.15))
 
-                // 3) Content: either result or list
                 if let result = viewModel.aiResult {
                     resultView(result)
                 } else {
                     filtersContentView()
                 }
             }
+            .frame(maxWidth: .infinity)
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
+        .ignoresSafeArea(edges: .bottom)
     }
 
-    // MARK: - Tabs
+    // MARK: – Tabs
     private var tabsView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 32) {
+            HStack(spacing: 0) {
                 ForEach(AIFilter.FilterCategory.allCases, id: \.self) { cat in
                     tabButton(for: cat)
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 6)
             .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
         }
         .background(Color(hex: "#303030"))
         .cornerRadius(16, corners: [.topLeft, .topRight])
@@ -58,35 +55,32 @@ struct AIActionView: View {
 
     @ViewBuilder
     private func tabButton(for category: AIFilter.FilterCategory) -> some View {
-        let selected = selectedTab == category
+        let isSelected = (selectedTab == category)
         Button {
             withAnimation { selectedTab = category }
         } label: {
             VStack(spacing: 6) {
-                if let icon = category.iconName {
-                    Image(systemName: icon)
+                if let iconName = category.iconName {
+                    Image(systemName: iconName)
                         .font(.system(size: 20))
                 } else {
                     Text(category.displayTitle)
-                        .font(.system(size: 16, weight: selected ? .semibold : .regular))
+                        .font(.system(size: 16, weight: isSelected ? .semibold : .regular))
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
+                Rectangle()
+                    .fill(isSelected ? Color(hex: "#7B87FF") : .clear)
+                    .frame(height: 3)
             }
-            .foregroundColor(selected ? .white : .white.opacity(0.6))
+            .foregroundColor(isSelected ? .white : .white.opacity(0.6))
             .padding(.vertical, 6)
             .padding(.horizontal, 12)
-            .overlay(
-                Rectangle()
-                    .fill(selected ? Color(hex: "#7B87FF") : .clear)
-                    .frame(height: 3),
-                alignment: .bottom
-            )
         }
         .contentShape(Rectangle())
     }
 
-    // MARK: - Filters list
+    // MARK: – Filters list
     @ViewBuilder
     private func filtersContentView() -> some View {
         ScrollView {
@@ -99,57 +93,56 @@ struct AIActionView: View {
                         Text("Здесь пока ничего нет")
                             .foregroundColor(.white.opacity(0.7))
                             .padding(.top, 40)
+                            .frame(maxWidth: .infinity)
                     }
                 } else {
                     filtersListView(filters)
                 }
             }
             .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity)
         }
         .background(Color(hex: "#1B1A1A"))
     }
-    
-    // MARK: - Custom Create Filter View
-        private var customCreateFilterView: some View {
-            VStack {
-                Spacer()
-                VStack(spacing: 32) {
-                    Image(systemName: "wand.and.stars")
-                        .resizable()
-                        .frame(width: 48, height: 48)
-                        .foregroundColor(Color(hex: "#7B87FF"))
-                    Text("Создайте свой собственный AI-фильтр")
-                        .multilineTextAlignment(.center)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
-                        .padding(.horizontal, 32)
-                }
-                Spacer()
-                HStack {
-                    Spacer()
-                    Button {
-                        // action
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24))
-                            .foregroundColor(.white)
-                            .frame(width: 56, height: 56)
-                            .background(Color(hex: "#7B87FF"))
-                            .clipShape(Circle())
-                    }
-                    .padding(.trailing, 16)
-                    .padding(.bottom, 16)
-                }
+
+    private var customCreateFilterView: some View {
+        VStack {
+            Spacer()
+            VStack(spacing: 32) {
+                Image(systemName: "wand.and.stars")
+                    .resizable()
+                    .frame(width: 48, height: 48)
+                    .foregroundColor(Color(hex: "#7B87FF"))
+                Text("Создайте свой собственный AI-фильтр")
+                    .multilineTextAlignment(.center)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white.opacity(0.7))
+                    .padding(.horizontal, 32)
             }
-            .frame(maxWidth: .infinity)
+            Spacer()
+            HStack {
+                Spacer()
+                Button {
+                    // Действие создания фильтра
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                        .frame(width: 56, height: 56)
+                        .background(Color(hex: "#7B87FF"))
+                        .clipShape(Circle())
+                }
+                .padding(.trailing, 16)
+                .padding(.bottom, 16)
+            }
         }
-    
-    // MARK: - Filters List View
+        .frame(maxWidth: .infinity)
+    }
+
     private func filtersListView(_ filters: [FilterItem]) -> some View {
         VStack(spacing: 0) {
             ForEach(filters) { filter in
                 Button {
-                    // on tap filter
                     viewModel.callAI(action: filter.apiActionName)
                 } label: {
                     HStack {
@@ -174,13 +167,11 @@ struct AIActionView: View {
         }
     }
 
-    // MARK: - Result view
     private func resultView(_ result: String) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Button {
-                        // back to list
                         viewModel.aiResult = nil
                         viewModel.aiError = nil
                     } label: {
@@ -196,11 +187,11 @@ struct AIActionView: View {
                     .cornerRadius(8)
             }
             .padding(16)
+            .frame(maxWidth: .infinity)
         }
         .background(Color(hex: "#1B1A1A"))
     }
 
-    // MARK: - Helpers
     private func filtersForSelectedTab() -> [FilterItem] {
         switch selectedTab {
         case .action: return AIFilterData.actionFilters
@@ -213,16 +204,19 @@ struct AIActionView: View {
     }
 }
 
-// MARK: - RoundedCorner Extension
+// MARK: – RoundedCorner Shape + Extension
 fileprivate struct RoundedCorner: Shape {
     var radius: CGFloat
     var corners: UIRectCorner
+
     func path(in rect: CGRect) -> Path {
-        Path(UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        ).cgPath)
+        Path(
+            UIBezierPath(
+                roundedRect: rect,
+                byRoundingCorners: corners,
+                cornerRadii: CGSize(width: radius, height: radius)
+            ).cgPath
+        )
     }
 }
 

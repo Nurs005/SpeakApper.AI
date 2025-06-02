@@ -13,4 +13,5 @@ protocol RecordingUseCaseProtocol: AnyObject {
     func deleteRecording(url: URL)
     func deleteAllRecordings()
     func cacheSize() -> Int
+    func updateTranscription(for url: URL, with text: String)
 }

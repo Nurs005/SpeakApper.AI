@@ -118,13 +118,22 @@ fileprivate extension CoordinatorView {
         return AuthCodeView(email: email, authViewModel: authViewModel)
     }
     
+//    func buildDetailPage(for recording: Recording) -> some View {
+//        let vm = RecordingDetailViewModel(
+//            recording: recording,
+//            transcriptionManager: dependencies.transcriptionManager
+//        )
+//        return RecordingDetailView(viewModel: vm)
+//    }
     func buildDetailPage(for recording: Recording) -> some View {
         let vm = RecordingDetailViewModel(
-            recording: recording,
+            recording:         recording,
+            recordingUseCase:  dependencies.recordingUseCase,  
             transcriptionManager: dependencies.transcriptionManager
         )
         return RecordingDetailView(viewModel: vm)
     }
+ 
     
 }
 

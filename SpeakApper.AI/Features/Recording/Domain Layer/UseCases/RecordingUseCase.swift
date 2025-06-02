@@ -47,4 +47,8 @@ extension RecordingUseCase: RecordingUseCaseProtocol {
     func cacheSize() -> Int {
         repository.cacheSize()
     }
+    
+    func updateTranscription(for url: URL, with text: String) {
+        repository.updateTranscription(for: url, with: text)
+    }
 }
