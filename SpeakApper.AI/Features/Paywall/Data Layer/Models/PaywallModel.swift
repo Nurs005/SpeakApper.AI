@@ -25,5 +25,13 @@ struct PaywallSlide: Identifiable {
     let id = UUID()
     let features: [PaywallFeature]?
     let review: PaywallReview?
-} 
+}
+
+struct SubscriptionOption: Identifiable {
+    let id = UUID()
+    let title: String
+    let subtitle: String
+    let price: String
+    let isBestValue: Bool
+}
 

@@ -12,6 +12,9 @@ struct PaywallView: View {
     @State private var currentIndex = 0
     @Binding var isOnboardingFinished: Bool
     private let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
+    
+    @State private var selectedOption: UUID? = nil
+    @State private var isTrialEnabled: Bool = false
 
     var body: some View {
         VStack {
@@ -55,7 +58,11 @@ struct PaywallView: View {
             .padding(.top, 8)
 
             Spacer()
-            SubscriptionOptionsView()
+            SubscriptionOptionsView(
+                selectedOption: $selectedOption,
+                isTrialEnabled: $isTrialEnabled,
+                options: paywallViewModel.SubscriptionOptions
+            )
             Spacer()
 
             // Кнопка "Продолжить без подписки"
@@ -142,5 +149,15 @@ struct PaywallSlideView: View {
             }
         }
         .padding(.horizontal, 16)
+    }
+}
+
+
+struct PaywallView_Previews: PreviewProvider {
+    static var previews: some View {
+        PaywallView(
+            paywallViewModel: PaywallViewModel(),
+            isOnboardingFinished: .constant(false)
+        )
     }
 }
