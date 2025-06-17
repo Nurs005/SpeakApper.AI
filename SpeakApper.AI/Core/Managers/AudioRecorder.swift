@@ -6,107 +6,115 @@
 //
 
 import Foundation
-import SwiftUI
 import AVFoundation
-import Speech
 
-class AudioRecorder: NSObject, ObservableObject, AVAudioRecorderDelegate, AVAudioPlayerDelegate {
-    @Published var recordings: [Recording] = []
-    @Published var audioLevels: [CGFloat] = Array(repeating: 20, count: 30)
+final class AudioRecorder: NSObject, ObservableObject {
+    @Published var audioLevels: [Float] = []
     
-    @ObservedObject var transcriptionManager = TranscriptionManager()
-    
-    var audioRecorder: AVAudioRecorder?
-    var audioPlayer: AVAudioPlayer?
-    
+    private var audioRecorder: AVAudioRecorder?
+    private var audioPlayer: AVAudioPlayer?
     private var meterTimer: Timer?
     
-    // MARK: - Start Recording
+    private let useCase: RecordingUseCaseProtocol
+    
+    private(set) var lastRecordedURL: URL?
+    private(set) var lastRecordedDuration: TimeInterval?
+    var onFinishRecording: (() -> Void)?
+    
+    var onFinishPlaying: (() -> Void)?
+    
+    init(useCase: RecordingUseCaseProtocol) {
+        self.useCase = useCase
+        super.init()
+    }
+    
+    // MARK: - Start
     func startRecording() {
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
-            try audioSession.setActive(true)
-        } catch {
-            print("Ошибка настройки аудио сессии: \(error.localizedDescription)")
-            return
-        }
-        
-        let sequence = (recordings.last?.sequence ?? 0) + 1
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd_HHmmss"
-        let dateString = formatter.string(from: Date())
-        let fileName = "Recording_\(sequence)_\(dateString).m4a"
-        
-        let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(fileName)
+        let fileName = UUID().uuidString + ".m4a"
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
         
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 44100.0,
+            AVSampleRateKey: 12000,
             AVNumberOfChannelsKey: 1,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
         
         do {
-            audioRecorder = try AVAudioRecorder(url: path, settings: settings)
-            audioRecorder?.delegate = self
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playAndRecord, mode: .default)
+            try session.setActive(true)
+            
+            audioRecorder = try AVAudioRecorder(url: url, settings: settings)
             audioRecorder?.isMeteringEnabled = true
             audioRecorder?.record()
-            print("Запись будет сохранена сюда: \(path)")
-            startMeterTimer()
-        } catch {
-            print("Не удалось начать запись: \(error.localizedDescription)")
-        }
-    }
-    
-    // MARK: - Stop Recording
-    func stopRecording() {
-        audioRecorder?.stop()
-        audioRecorder = nil
-        stopMeterTimer()
-        fetchRecordings()
-
-        if let lastRecording = recordings.last {
-            transcriptionManager.transcribeAudio(url: lastRecording.url) { transcription in
-                print("Транскрипция: \(transcription ?? "Нет данных")")
-            }
-        }
-    }
-    
-    // MARK: - Fetch Recordings
-    func fetchRecordings() {
-        let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        
-        do {
-            let files = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)
             
-            let fetchedRecordings = files.filter { $0.pathExtension == "m4a" }.compactMap { url -> Recording? in
-                let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
-                let creationDate = attributes?[.creationDate] as? Date ?? Date()
-                
-                let fileName = url.lastPathComponent
-                let components = fileName.split(separator: "_")
-                let sequence = components.count > 1 ? Int(components[1]) ?? 0 : 0
-                
-                return Recording(url: url, date: creationDate, sequence: sequence)
-            }
-            recordings = fetchedRecordings.sorted(by: { $0.sequence < $1.sequence })
+            startMeterTimer()
+            print("Запись начата: \(url.lastPathComponent)")
         } catch {
-            print("Не удалось получить записи: \(error.localizedDescription)")
+            print("Ошибка записи: \(error.localizedDescription)")
         }
     }
     
-    // MARK: - Playback
-    func playRecording(url: URL, completion: @escaping(Bool) -> Void) {
-        stopPlayback()
+    // MARK: - Stop
+    func stopRecording(delete: Bool = false) {
+        audioRecorder?.stop()
+        stopMeterTimer()
         
+        guard !delete, let recorder = audioRecorder else { return }
+        
+        let url = recorder.url
+        let duration = getDuration(for: url)
+        
+        lastRecordedURL = url
+        lastRecordedDuration = duration
+        
+        useCase.saveRecording(from: url, duration: duration)
+        print("Сохранено через UseCase: \(url.lastPathComponent), \(Int(duration)) сек")
+        
+        DispatchQueue.main.async {
+            self.onFinishRecording?()
+        }
+    }
+    
+    // MARK: - Pause / Resume
+    func pause() {
+        audioRecorder?.pause()
+        stopMeterTimer()
+        print("Пауза")
+    }
+    
+    func resume() {
+        audioRecorder?.record()
+        startMeterTimer()
+        print("Возобновление")
+    }
+    
+    // MARK: - Delete
+    func deleteRecording(url: URL) {
         do {
+            try FileManager.default.removeItem(at: url)
+            print("Удалено: \(url.lastPathComponent)")
+        } catch {
+            print("Ошибка при удалении: \(error.localizedDescription)")
+        }
+    }
+    
+    func playRecording(url: URL, completion: @escaping (Bool) -> Void) {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default)
+            try session.setActive(true)
+            
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.delegate = self
+            audioPlayer?.prepareToPlay()
             audioPlayer?.play()
+            
+            print("Воспроизведение запущено")
             completion(true)
         } catch {
-            print("Не удалось воспроизвести запись: \(error.localizedDescription)")
+            print("Ошибка воспроизведения: \(error)")
             completion(false)
         }
     }
@@ -114,22 +122,38 @@ class AudioRecorder: NSObject, ObservableObject, AVAudioRecorderDelegate, AVAudi
     func stopPlayback() {
         audioPlayer?.stop()
         audioPlayer = nil
+        onFinishPlaying?()
     }
     
-    // MARK: - Delete Recording
-    func deleteRecording(url: URL) {
-        do {
-            try FileManager.default.removeItem(at: url)
-            fetchRecordings()
-        } catch {
-            print("Не удалось удалить запись: \(error.localizedDescription)")
+    // MARK: - Helper
+    private func getDuration(for url: URL) -> TimeInterval {
+        let asset = AVURLAsset(url: url)
+        return CMTimeGetSeconds(asset.duration)
+    }
+    
+    private func normalizedPowerLevel(from decibels: Float) -> Float {
+        let minDb: Float = -60
+        if decibels < minDb {
+            return 0
         }
+        return (decibels + abs(minDb)) / abs(minDb)
     }
     
-    // MARK: - Meter Timer
     private func startMeterTimer() {
-        meterTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            self?.updateAudioLevels()
+        audioRecorder?.isMeteringEnabled = true
+        meterTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
+            guard let recorder = self.audioRecorder else { return }
+            recorder.updateMeters()
+            
+            let power = recorder.averagePower(forChannel: 0)
+            let normalized = self.normalizedPowerLevel(from: power)
+            
+            DispatchQueue.main.async {
+                self.audioLevels.append(normalized)
+                if self.audioLevels.count > 30 {
+                    self.audioLevels.removeFirst()
+                }
+            }
         }
     }
     
@@ -137,42 +161,11 @@ class AudioRecorder: NSObject, ObservableObject, AVAudioRecorderDelegate, AVAudi
         meterTimer?.invalidate()
         meterTimer = nil
     }
-    
-    private func updateAudioLevels() {
-        guard let recorder = audioRecorder else { return }
-        recorder.updateMeters()
-        let averagePower = recorder.averagePower(forChannel: 0)
-        let normalizedLevel = self.normalizedPowerLevel(fromDecibels: averagePower)
-        
-        DispatchQueue.main.async {
-            self.audioLevels.append(normalizedLevel)
-            if self.audioLevels.count > 30 {
-                self.audioLevels.removeFirst()
-            }
-        }
-    }
-    
-    private func normalizedPowerLevel(fromDecibels decibels: Float) -> CGFloat {
-        if decibels < -80 {
-            return 0.0
-        } else if decibels >= 0 {
-            return 1.0
-        } else {
-            return CGFloat((decibels + 80) / 80)
-        }
-    }
+}
 
-    // MARK: - AVAudioRecorderDelegate
-    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        if flag {
-            fetchRecordings()
-        } else {
-            print("Запись не удалась.")
-        }
-    }
-
-    // MARK: - AVAudioPlayerDelegate
+// MARK: - AVAudioPlayerDelegate
+extension AudioRecorder: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        NotificationCenter.default.post(name: .playbackFinished, object: nil)
+        onFinishPlaying?()
     }
 }

@@ -8,64 +8,132 @@
 import Foundation
 import Combine
 
-class RecordingViewModel: ObservableObject {
+final class RecordingViewModel: ObservableObject {
+    
     @Published var recordings: [Recording] = []
     @Published var searchText: String = ""
     @Published var transcriptions: [URL: String] = [:]
-
-    let audioRecorder = AudioRecorder()
-    private let transcriptionManager = TranscriptionManager()
-
-    init() {
+    @Published var isPlaying: Bool = false
+    @Published var currentlyPlayingURL: URL?
+    @Published var audioLevels: [Float] = []
+    
+    var onSaveRecording: ((Recording) -> Void)?
+    
+    // MARK: - Dependencies
+    private let useCase: RecordingUseCaseProtocol
+    let audioRecorder: AudioRecorder
+    private let transcriptionManager: TranscriptionManager
+    
+    private var transcriptionCancellable: AnyCancellable?
+    private var levelsCancellable: AnyCancellable?
+    
+    // MARK: - Init
+    init(
+        useCase: RecordingUseCaseProtocol = RecordingUseCase(
+            repository: RecordingRepository(
+                localDataSource: RecordingLocalDataSource()
+            )
+        ),
+        transcriptionManager: TranscriptionManager = .shared
+    ) {
+        self.useCase = useCase
+        self.transcriptionManager = transcriptionManager
+        self.audioRecorder = AudioRecorder(useCase: useCase)
+        
+        bindAudioEvents()
+        bindAudioLevels()
+        bindTranscriptions()
         fetchRecordings()
     }
-
-    // MARK: - Получение записей
-    func fetchRecordings() {
-        audioRecorder.fetchRecordings()
-        recordings = audioRecorder.recordings
-        fetchTranscriptions()
+    
+    // MARK: - Binding
+    private func bindAudioEvents() {
+        audioRecorder.onFinishRecording = { [weak self] in
+            guard
+                let self = self,
+                let url = self.audioRecorder.lastRecordedURL,
+                let duration = self.audioRecorder.lastRecordedDuration
+            else { return }
+            
+            let newRec = Recording(
+                url: url,
+                date: Date(),
+                sequence: 0,
+                transcription: nil,
+                duration: duration
+            )
+            self.fetchRecordings()
+            DispatchQueue.main.async {
+                self.onSaveRecording?(newRec)
+            }
+        }
+        
+        audioRecorder.onFinishPlaying = { [weak self] in
+            DispatchQueue.main.async {
+                self?.isPlaying = false
+                self?.currentlyPlayingURL = nil
+            }
+        }
     }
-
-    // MARK: - Транскрипция
-    private func fetchTranscriptions() {
+    
+    private func bindAudioLevels() {
+        levelsCancellable = audioRecorder.$audioLevels
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.audioLevels, on: self)
+    }
+    
+    private func bindTranscriptions() {
+        transcriptionCancellable = transcriptionManager.$transcriptions
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] cache in
+                self?.transcriptions = cache
+            }
+    }
+    
+    // MARK: - Recordings
+    func fetchRecordings() {
+        recordings = useCase.getRecordings()
+            .sorted { $0.date > $1.date }
         for recording in recordings {
-            transcriptionManager.transcribeAudio(url: recording.url) { [weak self] transcription in
+            if transcriptionManager.transcriptions[recording.url] == nil {
+                transcriptionManager.transcribeAudioWithFallback(url: recording.url) { _ in }
+            }
+        }
+    }
+    
+    // MARK: - Playback
+    func playRecording(_ recording: Recording) {
+        if currentlyPlayingURL == recording.url && isPlaying {
+            audioRecorder.stopPlayback()
+            isPlaying = false
+            currentlyPlayingURL = nil
+        } else {
+            audioRecorder.playRecording(url: recording.url) { [weak self] success in
                 DispatchQueue.main.async {
-                    if let transcription = transcription {
-                        self?.transcriptions[recording.url] = transcription
+                    if success {
+                        self?.currentlyPlayingURL = recording.url
+                        self?.isPlaying = true
                     }
                 }
             }
         }
     }
-
-    // MARK: - Воспроизведение записи
-    func playRecording(_ recording: Recording) {
-        audioRecorder.playRecording(url: recording.url) { success in
-            if success {
-                print("Воспроизведение начато")
-            } else {
-                print("Ошибка воспроизведения")
-            }
+    
+    // MARK: - Deletion
+    func delete(at offsets: IndexSet) {
+        offsets.forEach { idx in
+            let rec = recordings[idx]
+            useCase.deleteRecording(url: rec.url)
         }
-    }
-
-    // MARK: - Удаление записи
-    func deleteRecording(_ recording: Recording) {
-        audioRecorder.deleteRecording(url: recording.url)
         fetchRecordings()
     }
-
-    // MARK: - Фильтрация записей
+    
+    // MARK: - Filtering
     func filteredRecordings() -> [Recording] {
-        if searchText.isEmpty {
-            return recordings
-        } else {
-            return recordings.filter {
-                $0.formattedDate.localizedCaseInsensitiveContains(searchText) ||
-                $0.url.lastPathComponent.localizedCaseInsensitiveContains(searchText)
-            }
+        guard !searchText.isEmpty else { return recordings }
+        return recordings.filter {
+            $0.formattedDate.localizedCaseInsensitiveContains(searchText) ||
+            $0.url.lastPathComponent.localizedCaseInsensitiveContains(searchText)
         }
     }
 }

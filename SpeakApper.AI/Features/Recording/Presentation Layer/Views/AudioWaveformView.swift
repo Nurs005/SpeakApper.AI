@@ -7,30 +7,20 @@
 
 import SwiftUI
 
-struct AudioWaveFormView: View {
-    let audioLevels: [CGFloat]
-    
+struct AudioWaveformView: View {
+    var audioLevels: [CGFloat]
+
     var body: some View {
-        GeometryReader { geometry in
-            HStack(alignment: .center, spacing: 3) {
-                ForEach(audioLevels.indices, id: \.self) { index in
-                    let level = min(max(audioLevels[index], 0.1), 1.0) 
-                    
-                    Capsule()
-                        .fill(LinearGradient(
-                            gradient: Gradient(colors: [Color.purple, Color.blue]),
-                            startPoint: .top,
-                            endPoint: .bottom)
-                        )
-                        .frame(
-                            width: (geometry.size.width / CGFloat(audioLevels.count)) - 3,
-                            height: max(level * 120, 10)
-                        )
-                        .animation(.easeInOut(duration: 0.1), value: level)
-                }
+        HStack(spacing: 4) {
+            ForEach(0..<audioLevels.count, id: \.self) { index in
+                Capsule()
+                    .fill(Color.purple.opacity(0.8))
+                    .frame(width: 4, height: max(CGFloat(audioLevels[index]) * 100, 4))
+                    .animation(.easeInOut(duration: 0.2), value: audioLevels[index])
             }
-            .frame(maxHeight: .infinity)
         }
-        .padding(.horizontal, 10)
+        .padding(.vertical, 16)
+        .padding(.horizontal, 16)
+        .frame(height: 160)
     }
 }

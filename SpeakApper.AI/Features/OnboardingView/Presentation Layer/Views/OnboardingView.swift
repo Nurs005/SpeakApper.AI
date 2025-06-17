@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @StateObject var viewModel = OnboardingViewModel()
+    @ObservedObject var viewModel: OnboardingViewModel
     @State private var showOnboarding = false
     @State private var isOnboardingFinished = false
 
     var body: some View {
         if isOnboardingFinished {
-            MainView()
+//            MainView()
         } else {
             VStack {
                 if showOnboarding {
@@ -50,13 +50,9 @@ struct OnboardingView: View {
                 }
             }
             .background(Color("BackgroundColor").ignoresSafeArea())
-            .fullScreenCover(isPresented: $viewModel.showPaywall) {
-                PaywallView(isOnboardingFinished: $isOnboardingFinished)
-            }
+//            .fullScreenCover(isPresented: $viewModel.showPaywall) {
+//                PaywallView(isOnboardingFinished: $isOnboardingFinished)
+//            }
         }
     }
-}
-
-#Preview {
-    OnboardingView()
 }

@@ -7,56 +7,141 @@
 
 import Foundation
 import Speech
+import AVFoundation
 
-class TranscriptionManager: ObservableObject {
+final class TranscriptionManager: ObservableObject {
     @Published var transcriptions: [URL: String] = [:]
-
-    // MARK: - Транскрипция аудиофайла
-    func transcribeAudio(url: URL, completion: @escaping (String?) -> Void) {
-        let recognizer = SFSpeechRecognizer()
-        let request = SFSpeechURLRecognitionRequest(url: url)
-
-        // Проверка доступности распознавания
-        guard SFSpeechRecognizer.authorizationStatus() == .authorized else {
-            SFSpeechRecognizer.requestAuthorization { status in
-                if status == .authorized {
-                    self.startRecognition(with: recognizer, request: request, url: url, completion: completion)
-                } else {
-                    print("Ошибка: нет разрешения на использование распознавания речи")
-                    completion(nil)
-                }
-            }
-            return
-        }
-
-        startRecognition(with: recognizer, request: request, url: url, completion: completion)
+    private let cacheKey = "transcription_cache"
+    private var recognitionTask: SFSpeechRecognitionTask?
+    static let shared = TranscriptionManager()
+    
+    init() {
+        loadCachedTranscriptions()
     }
-
-    // MARK: - Начало процесса распознавания
-    private func startRecognition(with recognizer: SFSpeechRecognizer?, request: SFSpeechURLRecognitionRequest, url: URL, completion: @escaping (String?) -> Void) {
-        recognizer?.recognitionTask(with: request) { result, error in
-            if let error = error {
-                print("Ошибка транскрипции: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-
-            if let result = result, result.isFinal {
-                let transcription = result.bestTranscription.formattedString
-                DispatchQueue.main.async {
-                    self.transcriptions[url] = transcription
-                }
-                completion(transcription)
-            }
+    
+    func transcribeAudio(
+        url: URL,
+        language: String = "",
+        completion: @escaping (String?) -> Void
+    ) {
+        if language.isEmpty {
+            transcribeAudioWithFallback(url: url, completion: completion)
+        } else {
+            transcribeAudioWithFallback(
+                url: url,
+                locales: [language],
+                completion: completion
+            )
         }
     }
-
-    // MARK: - Проверка статуса разрешений
+    
+    // MARK: — Попросить разрешение
     func requestSpeechAuthorization(completion: @escaping (Bool) -> Void) {
         SFSpeechRecognizer.requestAuthorization { status in
-            DispatchQueue.main.async {
-                completion(status == .authorized)
+            DispatchQueue.main.async { completion(status == .authorized) }
+        }
+    }
+    
+    // MARK: — Fallback между локалями 
+    func transcribeAudioWithFallback(
+        url: URL,
+        locales: [String] = ["en-US", "ru-RU"],
+        completion: @escaping (String?) -> Void
+    ) {
+        guard !locales.isEmpty else {
+            return DispatchQueue.main.async { completion(nil) }
+        }
+        let locale = locales[0]
+        transcribeAudioSingle(url: url, languageCode: locale) { [weak self] text in
+            if let text = text?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !text.isEmpty {
+                return completion(text)
+            }
+            let remaining = Array(locales.dropFirst())
+            self?.transcribeAudioWithFallback(
+                url: url,
+                locales: remaining,
+                completion: completion
+            )
+        }
+    }
+    
+    // MARK: — Собственно распознавание на одной локали
+    private func transcribeAudioSingle(
+        url: URL,
+        languageCode: String,
+        completion: @escaping (String?) -> Void
+    ) {
+        if let cached = transcriptions[url] {
+            print("Кэш для \(url.lastPathComponent)")
+            return DispatchQueue.main.async { completion(cached) }
+        }
+        guard SFSpeechRecognizer.authorizationStatus() == .authorized else {
+            return SFSpeechRecognizer.requestAuthorization { [weak self] status in
+                DispatchQueue.main.async {
+                    if status == .authorized {
+                        self?.transcribeAudioSingle(
+                            url: url,
+                            languageCode: languageCode,
+                            completion: completion
+                        )
+                    } else {
+                        print("Нет прав на распознавание")
+                        completion(nil)
+                    }
+                }
             }
         }
+        let recognizer = SFSpeechRecognizer(locale: Locale(identifier: languageCode))
+        guard let rec = recognizer, rec.isAvailable else {
+            print("SpeechRecognizer недоступен для \(languageCode)")
+            return DispatchQueue.main.async { completion(nil) }
+        }
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        
+        let request = SFSpeechURLRecognitionRequest(url: url)
+        request.shouldReportPartialResults = false
+        
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        
+        recognitionTask = rec.recognitionTask(with: request) { [weak self] result, error in
+            if let err = error as NSError? {
+                print("Ошибка распознавания [\(err.code)]: \(err.localizedDescription)")
+                self?.recognitionTask = nil
+                return DispatchQueue.main.async { completion(nil) }
+            }
+            guard let res = result, res.isFinal else { return }
+            let text = res.bestTranscription.formattedString
+            self?.saveCache(url: url, text: text)
+            DispatchQueue.main.async {
+                self?.transcriptions[url] = text
+                print("Распознано: \(text.prefix(100))…")
+                completion(text)
+            }
+            self?.recognitionTask = nil
+        }
+    }
+    
+    // MARK: — Кэширование
+    private func saveCache(url: URL, text: String) {
+        var raw = UserDefaults.standard.dictionary(forKey: cacheKey) as? [String: String] ?? [:]
+        raw[url.lastPathComponent] = text
+        UserDefaults.standard.set(raw, forKey: cacheKey)
+    }
+    
+    private func loadCachedTranscriptions() {
+        let raw = UserDefaults.standard.dictionary(forKey: cacheKey) as? [String: String] ?? [:]
+        let docs = FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask).first!
+        raw.forEach { fileName, text in
+            let url = docs.appendingPathComponent(fileName)
+            transcriptions[url] = text
+        }
+    }
+    
+    func clearCache() {
+        transcriptions.removeAll()
+        UserDefaults.standard.removeObject(forKey: cacheKey)
     }
 }

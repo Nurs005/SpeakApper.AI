@@ -7,12 +7,14 @@
 
 import Foundation
 
-struct Recording: Identifiable, Equatable {
-    let id = UUID()
+struct Recording: Identifiable, Equatable, Hashable {
+    var id: String { url.lastPathComponent }
     let url: URL
     let date: Date
     let sequence: Int
     var transcription: String?
+    let duration: TimeInterval
+    
 
     var formattedDate: String {
         let formatter = DateFormatter()

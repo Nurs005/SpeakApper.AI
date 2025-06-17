@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3A0EF92C2D67080E002C136D /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3A0EF92B2D67080E002C136D /* FirebaseAuth */; };
+		3A0EF92E2D67080E002C136D /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3A0EF92D2D67080E002C136D /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3A29E41D2D45434F002D004F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A0EF92C2D67080E002C136D /* FirebaseAuth in Frameworks */,
+				3A0EF92E2D67080E002C136D /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +119,8 @@
 			);
 			name = SpeakApper.AI;
 			packageProductDependencies = (
+				3A0EF92B2D67080E002C136D /* FirebaseAuth */,
+				3A0EF92D2D67080E002C136D /* FirebaseFirestore */,
 			);
 			productName = SpeakApper.AI;
 			productReference = 3A29E40C2D45434D002D004F /* SpeakApper.AI.app */;
@@ -195,6 +204,9 @@
 			);
 			mainGroup = 3A29E4032D45434D002D004F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3A0EF92A2D67080E002C136D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3A29E40D2D45434D002D004F /* Products */;
 			projectDirPath = "";
@@ -393,9 +405,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SpeakApper.AI/SpeakApper.AI.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SpeakApper.AI/Preview Content\"";
+				DEVELOPMENT_TEAM = 46XVA3WLKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Для записи аудио";
@@ -410,8 +425,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "marlmyn.SpeakApper-AI";
+				PRODUCT_BUNDLE_IDENTIFIER = app.speakapper.spk;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -423,9 +439,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SpeakApper.AI/SpeakApper.AI.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"SpeakApper.AI/Preview Content\"";
+				DEVELOPMENT_TEAM = 46XVA3WLKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Для записи аудио";
@@ -440,8 +459,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "marlmyn.SpeakApper-AI";
+				PRODUCT_BUNDLE_IDENTIFIER = app.speakapper.spk;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -489,9 +509,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2F4X67JR9P;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "marlmyn.SpeakApper-AIUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = app.speakapper.spk;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -505,9 +526,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2F4X67JR9P;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "marlmyn.SpeakApper-AIUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = app.speakapper.spk;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -556,6 +578,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3A0EF92A2D67080E002C136D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.8.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3A0EF92B2D67080E002C136D /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3A0EF92A2D67080E002C136D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		3A0EF92D2D67080E002C136D /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3A0EF92A2D67080E002C136D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3A29E4042D45434D002D004F /* Project object */;
 }

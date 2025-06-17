@@ -6,135 +6,191 @@
 //
 
 import SwiftUI
-import AVFoundation
 
 struct MainView: View {
-    @StateObject private var viewModel = RecordingViewModel()
-    @State private var isRecordingPresented = false
-    @State private var hasSavedRecording = false
+    @Bindable var viewModel: MainViewModel
+    @Environment(Coordinator.self) var coordinator
+    
+    @State private var isSearching = false
+    @FocusState private var searchFieldIsFocused: Bool
+    
+    @State private var itemToDelete: RecordingItemViewModel?
+    @State private var showingDeleteAlert = false
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color("BackgroundColor").ignoresSafeArea()
-
-                VStack(alignment: .leading, spacing: 16) {
-                    headerView
-                    SearchBar(text: $viewModel.searchText)
-                        .padding(.horizontal)
-                    DynamicNavigationItemsView()
-                    BannerView()
-                        .padding(.horizontal)
-                    recordingsListView
-                    Spacer()
+        VStack(spacing: 16) {
+            headerView
+            
+            searchBarView
+            
+            if !viewModel.hasSubscription {
+                buyPremiumView
+            }
+            
+            quickActionsView
+                .padding(.vertical, 16)
+            
+            recordingsView
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .background(Color(.background).ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            VStack(spacing: 38) {
+                if viewModel.recordingItemsViewModels.isEmpty {
+                    recordingTipView
+                        .padding(.horizontal, 16)
                 }
-                recordButton
+                startRecordingButtonView
             }
-            .toolbarBackground(.hidden, for: .navigationBar)
+            .padding(.bottom, 30)
         }
-        .onAppear {
-            viewModel.fetchRecordings()
-        }
-    }
-
-    private var headerView: some View {
-        HStack {
-            Text("SpeakerApp")
-                .font(.system(size: 21, weight: .bold))
-                .foregroundColor(.white)
-
-            Spacer()
-
-            NavigationLink(destination: SettingsView()) {
-                Image("settings")
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(.white)
+        
+        .alert("Удалить запись?", isPresented: $showingDeleteAlert, presenting: itemToDelete) { item in
+            Button("Удалить", role: .destructive) {
+                viewModel.delete(item)
             }
-        }
-        .padding(.horizontal)
-    }
-
-    private var recordingsListView: some View {
-        List {
-            ForEach(viewModel.filteredRecordings()) { recording in
-                NavigationLink(destination: RecordingDetailView(recording: recording)) {
-                    recordingRow(for: recording)
-                }
-                .listRowBackground(Color("BackgroundColor"))
-            }
-            .onDelete(perform: deleteRecording)
-        }
-        .listStyle(PlainListStyle())
-        .background(Color("BackgroundColor").ignoresSafeArea())
-    }
-
-    private func deleteRecording(at offsets: IndexSet) {
-        offsets.forEach { index in
-            let recording = viewModel.filteredRecordings()[index]
-            viewModel.deleteRecording(recording)
-        }
-    }
-
-    private func recordingRow(for recording: Recording) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(viewModel.transcriptions[recording.url]?.components(separatedBy: " ").prefix(4).joined(separator: " ") ?? "Новая запись")
-                    .font(.headline)
-                    .foregroundColor(.white)
-
-                HStack(spacing: 8) {
-                    Text(recording.formattedDate)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-
-                    Image(systemName: "clock")
-                        .foregroundColor(.gray)
-                        .font(.subheadline)
-
-                    Text(getAudioDuration(for: recording))
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-            }
-
-            Spacer()
-        }
-        .frame(height: 28)
-        .padding()
-        .background(Color("BackgroundColor"))
-    }
-
-    private func getAudioDuration(for recording: Recording) -> String {
-        let asset = AVURLAsset(url: recording.url)
-        let duration = asset.duration
-        let durationInSeconds = CMTimeGetSeconds(duration)
-
-        let minutes = Int(durationInSeconds) / 60
-        let seconds = Int(durationInSeconds) % 60
-
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-
-    private var recordButton: some View {
-        VStack {
-            Spacer()
-            Button(action: {
-                isRecordingPresented = true
-            }) {
-                Image("Bttn")
-                    .resizable()
-                    .frame(width: 144, height: 144)
-                    .foregroundColor(Color("micColor"))
-            }
-            .fullScreenCover(isPresented: $isRecordingPresented) {
-                RecordingView(isPresented: $isRecordingPresented, viewModel: viewModel, hasSavedRecording: $hasSavedRecording)
-            }
-            .padding(.bottom, 32)
+            Button("Отмена", role: .cancel) {}
         }
     }
 }
 
-#Preview {
-    MainView()
+fileprivate extension MainView {
+    var headerView: some View {
+        HStack {
+            Text("SpeakApper")
+                .font(.system(size: 21, weight: .bold))
+                .foregroundColor(.white)
+            Spacer()
+            Button { coordinator.push(.settings) } label: {
+                Image(.settings).resizable().frame(width: 24, height: 24)
+            }
+        }
+    }
+    
+    var searchBarView: some View {
+        NavigationLink(destination: SearchView(viewModel: viewModel)) {
+            HStack(spacing: 16) {
+                Image(.mangnifyingglass)
+                    .foregroundColor(.white.opacity(0.7))
+                Text("Поиск")
+                    .foregroundColor(.white.opacity(0.7))
+                Spacer()
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .background(Color("searchColor"))
+            .cornerRadius(10)
+        }
+        .buttonStyle(.plain)
+    }
+    
+    
+    var buyPremiumView: some View {
+        HStack(spacing: 4) {
+            Image(.premiumLightning)
+            Text("Попробуйте SpeakApper Premium бесплатно\nНажмите, чтобы попробовать сейчас!")
+                .font(.system(size: 15))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, 16)
+        .padding(.horizontal, 8)
+        .background(
+            LinearGradient(
+                colors: [Color(hex: "#6D4BCC"), Color(hex: "#5B51C9"), Color(hex: "#9856EA")],
+                startPoint: .leading, endPoint: .trailing
+            )
+        )
+        .cornerRadius(10)
+    }
+    
+    var quickActionsView: some View {
+        HStack(alignment: .top, spacing: 27) {
+            ForEach(mainQuickActions, id: \.self) { action in
+                QuickActionView(
+                    actionType: action,
+                    useShortTitle: true,
+                    isHorizontal: true,
+                    iconColor: Color(hex: "#7B87FF")
+                ) { selectedAction in
+                    coordinator.presentSheet(selectedAction.sheet)
+                }
+            }
+        }
+    }
+    
+    
+    var recordingsView: some View {
+        List {
+            ForEach(viewModel.recordingItemsViewModels, id: \.model.url) { itemVM in
+                Button {
+                    coordinator.push(.detail(recording: itemVM.model))
+                } label: {
+                    RecordingItemView(viewModel: itemVM)
+                        .frame(height: 68)
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .listRowInsets(EdgeInsets(
+                    top: 0,
+                    leading: 0,
+                    bottom: 0,
+                    trailing: 0
+                ))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color(.background))
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        itemToDelete = itemVM
+                        showingDeleteAlert = true
+                    } label: {
+                        Label("Удалить", systemImage: "trash")
+                    }
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .listStyle(.plain)
+        .onAppear { viewModel.reloadRecordings() }
+    }
+    
+    var recordingTipView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Начните запись")
+                .font(.system(size: 19, weight: .semibold))
+                .foregroundColor(.white)
+            
+            Text("Просто нажмите кнопку и сделайте свою первую голосовую запись на...")
+                .font(.system(size: 15))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.leading)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.mainTipBackground.opacity(0.18))
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.mainTipStrokeBorder, lineWidth: 0.5)
+                )
+        )
+    }
+    
+    var startRecordingButtonView: some View {
+        Button { coordinator.push(.recording) } label: {
+            Image(.startRecordingButton)
+                .overlay(alignment: .bottom) {
+                    Image(.startRecordingButtonTip)
+                        .offset(x: 0, y: 24)
+                }
+        }
+    }
+    
+    var startRecordingButtonTipView: some View {
+        Image(.startRecordingButtonTip)
+    }
+    
 }
