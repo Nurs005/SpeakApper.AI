@@ -37,4 +37,9 @@ class PaywallViewModel: ObservableObject {
             PaywallReview(username: "marlmyn", rating: 5, reviewText: "SpeakApper – это отличное решение для тех, кто часто работает с аудио и хочет быстро получать качественные текстовые расшифровки. 🚀🔥")
         )
     ]
+    
+    @Published var SubscriptionOptions: [SubscriptionOption] = [
+        SubscriptionOption(title: "Годовой план", subtitle: "всего 2 082 kzt в месяц", price: "24 990 kzt в год", isBestValue: true),
+        SubscriptionOption(title: "3 дня бесплатно", subtitle: "затем 6 990 kzt в месяц", price: "", isBestValue: false)
+    ]
 }
