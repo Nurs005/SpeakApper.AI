@@ -16,11 +16,13 @@ final class Dependencies:
     private let network: Networking
     let transcriptionManager: TranscriptionManager = .shared
     var recordingUseCase: any RecordingUseCaseProtocol
+    var subscriptionManager: SubscriptionManager!
     
     init() {
         self.network = Network()
         let recordingRepository = RecordingRepository(localDataSource: RecordingLocalDataSource())
         recordingUseCase = RecordingUseCase(repository: recordingRepository)
+        subscriptionManager = SubscriptionManager()
     }
 }
 

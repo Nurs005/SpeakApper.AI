@@ -8,7 +8,8 @@
 import Foundation
 import SwiftUI
 
-class PaywallViewModel: ObservableObject {
+@MainActor
+class PaywallViewModel: ObservableObject {    
     @Published var paywallSlides: [PaywallSlide] = [
         PaywallSlide(features: [
             PaywallFeature(icon: "mic.fill", text: "Максимум 100 минут за запись"),
