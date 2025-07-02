@@ -9,7 +9,7 @@
       }
     ]
   },
-  "identifier" : "59A388B5",
+  "identifier" : "65D898F5",
   "nonRenewingSubscriptions" : [
 
   ],
@@ -17,25 +17,20 @@
 
   ],
   "settings" : {
-    "_askToBuyEnabled" : true,
-    "_billingGracePeriodEnabled" : true,
+    "_applicationInternalID" : "6742684807",
+    "_developerTeamID" : "TPD2BH47N5",
     "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 773070210.60773802,
     "_locale" : "en_US",
     "_storefront" : "USA",
     "_storeKitErrors" : [
       {
-        "current" : {
-          "index" : 2,
-          "type" : "generic"
-        },
+        "current" : null,
         "enabled" : false,
         "name" : "Load Products"
       },
       {
-        "current" : {
-          "index" : 1,
-          "type" : "purchase"
-        },
+        "current" : null,
         "enabled" : false,
         "name" : "Purchase"
       },
@@ -78,11 +73,11 @@
   },
   "subscriptionGroups" : [
     {
-      "id" : "2E7D9F12",
+      "id" : "21656280",
       "localizations" : [
 
       ],
-      "name" : "Premium",
+      "name" : "subs",
       "subscriptions" : [
         {
           "adHocOffers" : [
@@ -91,26 +86,55 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "40.99",
+          "displayPrice" : "49.99",
           "familyShareable" : false,
           "groupNumber" : 1,
-          "internalID" : "8F1C44CC",
+          "internalID" : "6748008766",
           "introductoryOffer" : {
-            "internalID" : "959F21D7",
+            "internalID" : "9464F692",
+            "numberOfPeriods" : 1,
             "paymentMode" : "free",
             "subscriptionPeriod" : "P1W"
           },
           "localizations" : [
             {
-              "description" : "",
-              "displayName" : "",
+              "description" : "Annual - yearly subscription ",
+              "displayName" : "Annual",
               "locale" : "en_US"
             }
           ],
           "productID" : "01",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Anual",
-          "subscriptionGroupID" : "2E7D9F12",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual",
+          "subscriptionGroupID" : "21656280",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "49.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6748020655",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Annual - yearly subscription ",
+              "displayName" : "Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "001",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual - No trial",
+          "subscriptionGroupID" : "21656280",
           "type" : "RecurringSubscription",
           "winbackOffers" : [
 

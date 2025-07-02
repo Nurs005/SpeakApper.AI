@@ -75,7 +75,7 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "../../SpeakApper.AI/Store/Products.storekit">
+         identifier = "../../SpeakApper.AI/Store/Speak Apper: AI transcribe.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction

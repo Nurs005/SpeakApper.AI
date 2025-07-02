@@ -9,36 +9,38 @@ import SwiftUI
 
 
 struct SubscriptionOptionsView: View {
-    @Binding var selectedOption: UUID?
+    @Binding var selectedOption: SubscriptionOption?
     @Binding var isTrialEnabled: Bool
 
     var options: [SubscriptionOption]
 
     var body: some View {
         VStack(spacing: 12) {
-            ForEach(options) { option in
+            ForEach(Array(options.enumerated()), id: \.1.id) { index, option in
                 subscriptionOptionRow(for: option)
+               
             }
 
-            // "Попробовать бесплатно"
-            Toggle(isOn: $isTrialEnabled) {
-                Text("Попробовать бесплатно")
-                    .foregroundColor(.white)
-                    .font(.system(size: 16, weight: .bold))
+            if let selected = selectedOption, selected.isTrialEnabled {
+                Toggle(isOn: $isTrialEnabled) {
+                    Text("Попробовать бесплатно")
+                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .bold))
+                }
+                .toggleStyle(SwitchToggleStyle(tint: Color("ButtonColor")))
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                )
             }
-            .toggleStyle(SwitchToggleStyle(tint: Color("ButtonColor")))
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-            )
         }
         .padding(.horizontal, 16)
     }
 
     @ViewBuilder
-    private func subscriptionOptionRow(for option: SubscriptionOption) -> some View {
-        let isSelected = selectedOption == option.id
+    private func subscriptionOptionRow(for option: SubscriptionOption ) -> some View {
+        let isSelected = selectedOption == option
 
         HStack {
             VStack(alignment: .leading, spacing: 4) {
@@ -94,7 +96,8 @@ struct SubscriptionOptionsView: View {
                 )
         )
         .onTapGesture {
-            selectedOption = option.id
+            print("Tapped option: \(option)")
+            selectedOption = option
         }
     }
 }

@@ -7,11 +7,12 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 typealias MainDependencies = HasRecordingUseCase
 
-@Observable
-final class MainViewModel {
+
+final class MainViewModel: ObservableObject {
     @ObservationIgnored private let recordingUseCase: RecordingUseCaseProtocol
     @ObservationIgnored private let transcriptionManager: TranscriptionManager
     @ObservationIgnored private(set) var recordingItemsViewModels: [RecordingItemViewModel] = []
@@ -31,7 +32,6 @@ final class MainViewModel {
 
     // MARK: — Состояния
     var hasRecordings: Bool { !recordingItemsViewModels.isEmpty }
-    var hasSubscription: Bool { false /* TODO: реальная логика подписки */ }
 
     // MARK: — Инициализация
     init(

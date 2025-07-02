@@ -10,18 +10,19 @@ import SwiftUI
 struct PaywallView: View {
     @ObservedObject var paywallViewModel: PaywallViewModel
     @State private var currentIndex = 0
-    @Binding var isOnboardingFinished: Bool
     private let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
     
-    @State private var selectedOption: UUID? = nil
+    @State private var selectedOption: SubscriptionOption? = nil
     @State private var isTrialEnabled: Bool = false
+    
+    let onFinish: () -> Void
 
     var body: some View {
         VStack {
             // Кнопка закрытия
             HStack {
                 Button(action: {
-                    isOnboardingFinished = true
+                    onFinish()
                 }) {
                     Image(systemName: "xmark")
                         .foregroundColor(.gray)
@@ -64,12 +65,26 @@ struct PaywallView: View {
                 options: paywallViewModel.SubscriptionOptions
             )
             Spacer()
-
-            // Кнопка "Продолжить без подписки"
+            
+            if let error = paywallViewModel.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .padding()
+            }
+            
             Button(action: {
-                isOnboardingFinished = true
+                if  selectedOption != nil {
+                    paywallViewModel.purchase(option: selectedOption!, isTrial: isTrialEnabled)
+                  } else {
+                      // Например просто закрыть пейвол или ничего не делать
+                      onFinish()
+                  }
             }) {
-                Text("Продолжить")
+                Text(
+                    selectedOption == nil
+                        ? "Продолжить"
+                        : (paywallViewModel.isPurchasing ? "Покупаем..." : "Оформить подписку")
+                )
                     .bold()
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -78,6 +93,8 @@ struct PaywallView: View {
                     .cornerRadius(12)
                     .padding(.horizontal, 16)
             }
+            .disabled(selectedOption == nil || paywallViewModel.isPurchasing)
+            .opacity(paywallViewModel.isPurchasing ? 0.5 : 1.0)
 
             // Условия
             HStack {
@@ -106,58 +123,5 @@ struct PaywallView: View {
             timer.upstream.connect().cancel()
         }
         .edgesIgnoringSafeArea(.bottom)
-    }
-}
-
-struct PaywallSlideView: View {
-    let slide: PaywallSlide
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if let features = slide.features {
-                ForEach(features) { feature in
-                    HStack {
-                        if let icon = feature.icon {
-                            Image(systemName: icon)
-                                .foregroundColor(.white)
-                                .font(.system(size: 20))
-                        }
-                        Text(feature.text)
-                            .foregroundColor(.white)
-                            .font(.system(size: 16))
-                        Spacer()
-                    }
-                }
-            } else if let review = slide.review {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("**\(review.username)**")
-                        .foregroundColor(.white)
-                        .font(.system(size: 18, weight: .bold))
-
-                    HStack(spacing: 4) {
-                        ForEach(0..<review.rating, id: \ .self) { _ in
-                            Image(systemName: "star.fill")
-                                .foregroundColor(.yellow)
-                        }
-                    }
-
-                    Text(review.reviewText)
-                        .foregroundColor(.white)
-                        .font(.system(size: 16))
-                        .lineLimit(4)
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-    }
-}
-
-
-struct PaywallView_Previews: PreviewProvider {
-    static var previews: some View {
-        PaywallView(
-            paywallViewModel: PaywallViewModel(),
-            isOnboardingFinished: .constant(false)
-        )
     }
 }
