@@ -9,33 +9,33 @@ import Foundation
 
 struct AIFilterData {
     static let actionFilters: [FilterItem] = [
-        FilterItem(title: "Перевести", subtitle: "Перевести текст на другой язык"),
-        FilterItem(title: "Добавить структуру", subtitle: "Организовать абзацы и добавить пунктуацию"),
-        FilterItem(title: "Резюмировать", subtitle: "Создать краткое резюме"),
-        FilterItem(title: "Детально суммаризировать", subtitle: "Итоги с подробными деталями"),
-        FilterItem(title: "Протокол встречи", subtitle: "Итоги для письма после встречи"),
-        FilterItem(title: "Маркеры", subtitle: "Преобразовать текст в маркированный список"),
-        FilterItem(title: "Переформулировать", subtitle: "Переформулировать текст")
+        FilterItem(title: "Translate", subtitle: "Translate text to another language"),
+        FilterItem(title: "Add structure", subtitle: "Organize paragraphs and add punctuation"),
+        FilterItem(title: "Summarize", subtitle: "Create a short summary"),
+        FilterItem(title: "Detailed summary", subtitle: "Takeaways with details"),
+        FilterItem(title: "Meeting minutes", subtitle: "Follow-up email summary"),
+        FilterItem(title: "Bullet points", subtitle: "Convert text to a bulleted list"),
+        FilterItem(title: "Rephrase", subtitle: "Rephrase the text")
     ]
     
     static let styleFilters: [FilterItem] = [
-        FilterItem(title: "Как электронное письмо", subtitle: "Отформатировать текст как деловое письмо"),
-        FilterItem(title: "Как заметку", subtitle: "Преобразовать текст в краткую заметку"),
-        FilterItem(title: "Как пост в блоге", subtitle: "Адаптировать текст для блога")
+        FilterItem(title: "As an email", subtitle: "Format text like a business email"),
+        FilterItem(title: "As a note", subtitle: "Convert text into a short note"),
+        FilterItem(title: "As a blog post", subtitle: "Adapt text for a blog")
     ]
     
     static let toneFilters: [FilterItem] = [
-        FilterItem(title: "Профессиональный", subtitle: "Задать формальный, профессиональный тон"),
-        FilterItem(title: "Уверенный", subtitle: "Задать смелый и уверенный тон"),
-        FilterItem(title: "Простой", subtitle: "Сделать тон расслабленным и неформальным"),
-        FilterItem(title: "Дружелюбный", subtitle: "Добавить тёплый, дружелюбный тон")
+        FilterItem(title: "Professional", subtitle: "Set a formal professional tone"),
+        FilterItem(title: "Confident", subtitle: "Set a bold and confident tone"),
+        FilterItem(title: "Casual", subtitle: "Make the tone relaxed and informal"),
+        FilterItem(title: "Friendly", subtitle: "Add a warm friendly tone")
     ]
     
     static let funFilters: [FilterItem] = [
-        FilterItem(title: "Создать тест", subtitle: "Создать тест из транскрипции"),
+        FilterItem(title: "Create quiz", subtitle: "Generate a quiz from the transcript"),
         FilterItem(title: "Reply", subtitle: "Reply to the text"),
-        FilterItem(title: "Песня", subtitle: "Преобразовать текст в песню"),
-        FilterItem(title: "Злой", subtitle: "Добавить сердитый тон в текст")
+        FilterItem(title: "Song", subtitle: "Turn the text into a song"),
+        FilterItem(title: "Angry", subtitle: "Add an angry tone to the text")
     ]
     
     static let customFilters: [FilterItem] = []

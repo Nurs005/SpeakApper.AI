@@ -90,7 +90,7 @@ struct AIActionView: View {
                     if selectedTab == .custom {
                         customCreateFilterView
                     } else {
-                        Text("Здесь пока ничего нет")
+                        Text("Nothing here yet")
                             .foregroundColor(.white.opacity(0.7))
                             .padding(.top, 40)
                             .frame(maxWidth: .infinity)
@@ -113,7 +113,7 @@ struct AIActionView: View {
                     .resizable()
                     .frame(width: 48, height: 48)
                     .foregroundColor(Color(hex: "#7B87FF"))
-                Text("Создайте свой собственный AI-фильтр")
+                Text("Create your own AI filter")
                     .multilineTextAlignment(.center)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.white.opacity(0.7))

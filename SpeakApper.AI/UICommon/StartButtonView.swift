@@ -18,7 +18,7 @@ struct StartButtonView: View {
                 viewModel.nextPage()
             }
         }) {
-            Text("Продолжить")
+            Text("Continue")
                 .bold()
                 .frame(maxWidth: .infinity)
                 .padding()

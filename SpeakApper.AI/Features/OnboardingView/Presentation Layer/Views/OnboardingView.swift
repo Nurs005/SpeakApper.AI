@@ -24,7 +24,7 @@ struct OnboardingView: View {
                         StartButtonView(viewModel: viewModel)
                     } else {
                         Button(action: {viewModel.showPaywall = true}) {
-                            Text("Продолжить")
+                            Text("Continue")
                                 .bold()
                                 .frame(maxWidth: .infinity)
                                 .padding()

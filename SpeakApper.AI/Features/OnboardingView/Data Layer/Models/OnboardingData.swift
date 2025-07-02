@@ -8,15 +8,24 @@
 import Foundation
 
 let onboardingData: [OnboardingModel] = [
-    OnboardingModel(image: "iconoir_microphone-speaking-solid", title: "Преобразование речи в текст", description: [
-        "Записывайте аудио на любом языке и получайте текст мгновенно.",
-        "Достигайте точности до 99% с помощью ИИ.",
-        "Поддержка файлов длительностью до 1 часа без потери качества."
-    ]),
-    OnboardingModel(image: "ri_voice-ai-fill", title: "AI редактирование в одно касание", headline: "Редактируйте текст одним кликом", description: [
-        "Резюмируйте текст, структурируйте информацию, создавайте списки.",
-        "Перефразируйте текст с изменением стиля и тона.",
-        "Переводите текст на несколько языков в реальном времени."
-    ])
+    OnboardingModel(
+        image: "iconoir_microphone-speaking-solid",
+        title: "Speech-to-text conversion",
+        description: [
+            "Record audio in any language and get text instantly.",
+            "Achieve up to 99% accuracy with AI.",
+            "Supports files up to 1 hour long without quality loss."
+        ]
+    ),
+    OnboardingModel(
+        image: "ri_voice-ai-fill",
+        title: "One-tap AI editing",
+        headline: "Edit text with a single tap",
+        description: [
+            "Summarize text, structure information, create lists.",
+            "Rephrase text changing style and tone.",
+            "Translate text into several languages in real time."
+        ]
+    )
 ]
 

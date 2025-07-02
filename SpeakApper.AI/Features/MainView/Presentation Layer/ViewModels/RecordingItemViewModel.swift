@@ -13,7 +13,7 @@ final class RecordingItemViewModel: ObservableObject, Hashable {
     private let transcriptionManager: TranscriptionManager
     private var cancellable: AnyCancellable?
 
-    @Published var title: String = "Транскрибируется..."
+    @Published var title: String = "Transcribing..."
     @Published var date: String
     @Published var duration: String
 
