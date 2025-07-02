@@ -16,6 +16,7 @@ final class Dependencies:
     private let network: Networking
     let transcriptionManager: TranscriptionManager = .shared
     var recordingUseCase: any RecordingUseCaseProtocol
+    var subscriptionManager: SubscriptionManager = .shared
     
     init() {
         self.network = Network()

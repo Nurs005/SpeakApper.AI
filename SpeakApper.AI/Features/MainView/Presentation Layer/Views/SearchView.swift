@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SearchView: View {
-    @Bindable var viewModel: MainViewModel
+    @ObservedObject var viewModel: MainViewModel
     @Environment(Coordinator.self) var coordinator
     @Environment(\.dismiss) private var dismiss
     @FocusState private var searchFieldIsFocused: Bool

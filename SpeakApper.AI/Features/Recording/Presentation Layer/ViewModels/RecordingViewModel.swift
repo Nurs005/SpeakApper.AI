@@ -16,6 +16,7 @@ final class RecordingViewModel: ObservableObject {
     @Published var isPlaying: Bool = false
     @Published var currentlyPlayingURL: URL?
     @Published var audioLevels: [Float] = []
+    @Published var hasSubscription: Bool = false
     
     var onSaveRecording: ((Recording) -> Void)?
     

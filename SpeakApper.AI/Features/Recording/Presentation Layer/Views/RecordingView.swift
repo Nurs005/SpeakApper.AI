@@ -11,14 +11,13 @@ import AVFoundation
 struct RecordingView: View {
     @ObservedObject var viewModel: RecordingViewModel
     @Environment(Coordinator.self) var coordinator
+    @EnvironmentObject var premiumStatus: PremiumStatusViewModel
     
     @State private var recordingTime: TimeInterval = 0
     @State private var timer: Timer? = nil
     @State private var isPaused = false
     @State private var hasStopped = false
-    
-    let maxRecordingDuration: TimeInterval = 120
-    
+        
     var body: some View {
         ZStack {
             Color("BackgroundColor").ignoresSafeArea()
@@ -32,8 +31,10 @@ struct RecordingView: View {
                 
                 timerView
                 
-                buyPremiumView
-                    .padding(.bottom, 72)
+                if !premiumStatus.hasSubscription{
+                    BuyPremiumView()
+                        .padding(.bottom, 72)
+                }
                 
                 controlsView
                     .padding(.bottom, 24)
@@ -55,30 +56,13 @@ extension RecordingView {
                 .foregroundColor(.white)
             Text(" / ")
                 .foregroundColor(Color(hex: "#454358"))
-            Text("2:00")
+            Text(formatTime(premiumStatus.maxRecordingDuration))
                 .foregroundColor(Color(hex: "#454358"))
         }
         .font(.system(size: 53, weight: .bold))
     }
     
-    var buyPremiumView: some View {
-        HStack(spacing: 4) {
-            Image(.premiumLightning)
-            Text("Попробуйте SpeakApper Premium бесплатно\nНажмите, чтобы попробовать сейчас!")
-                .font(.system(size: 15))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 8)
-        .background(
-            LinearGradient(colors: [Color(hex: "#6D4BCC"), Color(hex: "#5B51C9"), Color(hex: "#9856EA")],
-                           startPoint: .leading,
-                           endPoint: .trailing)
-        )
-        .cornerRadius(10)
-    }
+   
     
     var controlsView: some View {
         HStack(spacing: 32) {
@@ -173,7 +157,7 @@ extension RecordingView {
     
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            if recordingTime < maxRecordingDuration {
+            if recordingTime < premiumStatus.maxRecordingDuration {
                 recordingTime += 1
             } else {
                 stopRecording(delete: false)

@@ -13,8 +13,6 @@ class OnboardingViewModel: ObservableObject {
     @Published var selectedPurposes: Set<String> = []
     @Published var showPaywall = false
     
-    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
-    
     lazy var steps: [AnyView] = [
         AnyView(OnboardingCardView(onboarding: onboardingData[0])), 
         AnyView(OnboardingCardView(onboarding: onboardingData[1])),

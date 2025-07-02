@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct MainView: View {
-    @Bindable var viewModel: MainViewModel
+    @ObservedObject var viewModel: MainViewModel
     @Environment(Coordinator.self) var coordinator
+    @EnvironmentObject var premiumStatus: PremiumStatusViewModel
     
     @State private var isSearching = false
     @FocusState private var searchFieldIsFocused: Bool
@@ -23,9 +24,11 @@ struct MainView: View {
             
             searchBarView
             
-            if !viewModel.hasSubscription {
-                buyPremiumView
+            if !premiumStatus.hasSubscription {
+                BuyPremiumView()
             }
+            
+            
             
             quickActionsView
                 .padding(.vertical, 16)
@@ -86,25 +89,29 @@ fileprivate extension MainView {
     }
     
     
-    var buyPremiumView: some View {
-        HStack(spacing: 4) {
-            Image(.premiumLightning)
-            Text("Попробуйте SpeakApper Premium бесплатно\nНажмите, чтобы попробовать сейчас!")
-                .font(.system(size: 15))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 8)
-        .background(
-            LinearGradient(
-                colors: [Color(hex: "#6D4BCC"), Color(hex: "#5B51C9"), Color(hex: "#9856EA")],
-                startPoint: .leading, endPoint: .trailing
-            )
-        )
-        .cornerRadius(10)
-    }
+//    var buyPremiumView: some View {
+//        Button(action: {
+//            coordinator.presentFullCover(.paywall)
+//        }){
+//            HStack(spacing: 4) {
+//                Image(.premiumLightning)
+//                Text("Попробуйте SpeakApper Premium бесплатно\nНажмите, чтобы попробовать сейчас!")
+//                    .font(.system(size: 15))
+//                    .foregroundColor(.white)
+//                    .multilineTextAlignment(.leading)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//            }
+//            .padding(.vertical, 16)
+//            .padding(.horizontal, 8)
+//            .background(
+//                LinearGradient(
+//                    colors: [Color(hex: "#6D4BCC"), Color(hex: "#5B51C9"), Color(hex: "#9856EA")],
+//                    startPoint: .leading, endPoint: .trailing
+//                )
+//            )
+//            .cornerRadius(10)
+//        }
+//    }
     
     var quickActionsView: some View {
         HStack(alignment: .top, spacing: 27) {

@@ -13,6 +13,17 @@ final class Coordinator {
     var path: NavigationPath = NavigationPath()
     var sheet: Sheet?
     var fullscreenCover: FullScreenCover?
+    var root: RootPage
+    
+    init(typeRoot: RootPage) {
+        self.root = typeRoot
+    }
+    
+    func decideInitialFlow() {
+        let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+        self.root = hasSeenOnboarding ? .main : .onboarding
+        self.path = NavigationPath()
+    }
     
     func push(_ page: Page) {
         path.append(page)
