@@ -17,28 +17,28 @@ enum QuickActionType: CaseIterable {
     var title: String {
         switch self {
             case .importFiles:
-                return "Импортировать файлы"
+                return "Import files"
             case .youtube:
                 return "Youtube to text"
             case .sendFeedback:
-                return "Отправить отзыв"
+                return "Send feedback"
             case .requestFeature:
-                return "Запросить функцию"
+                return "Request a feature"
             case .faq:
-                return "Вопросы и ответы"
+                return "FAQ"
         }
     }
     
     var shortTitle: String {
         switch self {
             case .importFiles:
-                return "Импорт записи"
+                return "Import recording"
             case .youtube:
                 return "Youtube"
             case .sendFeedback:
-                return "Отзыв"
+                return "Feedback"
             case .requestFeature:
-                return "Запрос функция"
+                return "Request feature"
             case .faq:
                 return "FAQ"
         }

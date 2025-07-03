@@ -24,7 +24,7 @@ struct OnboardingSelectionPage: View {
                         Button(action: {
                             //
                         }) {
-                            Text("Пропустить")
+                            Text("Skip")
                                 .foregroundColor(.gray)
                                 .font(.system(size: 17))
                         }

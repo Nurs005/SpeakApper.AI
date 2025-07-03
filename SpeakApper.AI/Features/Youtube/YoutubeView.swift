@@ -52,7 +52,7 @@ fileprivate extension YoutubeView {
                 Spacer()
             }
             
-            Text("YouTube в текст")
+            Text("YouTube to text")
                 .font(.system(size: 21, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -60,7 +60,7 @@ fileprivate extension YoutubeView {
     }
 
     var descriptionView: some View {
-        Text("Вы можете аудио из YouTube видео преобразовать в текст. Для этого вставьте ссылку ниже")
+        Text("You can convert audio from a YouTube video to text. Paste the link below")
             .font(.system(size: 16))
             .foregroundColor(.white.opacity(0.7))
             //.multilineTextAlignment(.leading)
@@ -73,7 +73,7 @@ fileprivate extension YoutubeView {
                 .fill(Color(hex: "#333333"))
             
             HStack {
-                TextField("", text: $videoURL, prompt: Text("URL видео").foregroundColor(.gray))
+                TextField("", text: $videoURL, prompt: Text("Video URL").foregroundColor(.gray))
                     .focused($isInputActive)
                     .padding(.leading, 16)
                     .foregroundColor(.white)
@@ -95,7 +95,7 @@ fileprivate extension YoutubeView {
         Button(action: {
             // Действие 
         }) {
-            Text("Транскрибировать")
+            Text("Transcribe")
                 .font(.system(size: 17, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .padding()

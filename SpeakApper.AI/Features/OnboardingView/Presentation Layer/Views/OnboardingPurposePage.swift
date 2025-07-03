@@ -23,7 +23,7 @@ struct OnboardingPurposePage: View {
                 Button(action: {
                     currentPage += 1
                 }) {
-                    Text("Пропустить")
+                    Text("Skip")
                         .foregroundColor(.gray)
                         .font(.system(size: 17))
                 }

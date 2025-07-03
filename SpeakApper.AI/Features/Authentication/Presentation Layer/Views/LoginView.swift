@@ -60,14 +60,14 @@ fileprivate extension LoginView {
     }
 
     var title: some View {
-        Text("Войдите в SpeakApper")
+        Text("Sign in to SpeakApper")
             .font(.system(size: 21).weight(.bold))
             .foregroundColor(.white)
             .padding(.top, 16)
     }
 
     var subtitle: some View {
-        Text("Храните файлы в безопасности и синхронизируйте их на всех устройствах")
+        Text("Keep files secure and sync them across all devices")
             .font(.system(size: 16))
             .multilineTextAlignment(.leading)
             .foregroundColor(.gray)
@@ -75,7 +75,7 @@ fileprivate extension LoginView {
     }
 
     var emailField: some View {
-        TextField("", text: $email, prompt: Text("Ваш адрес эл. почты").foregroundColor(.white))
+        TextField("", text: $email, prompt: Text("Your email address").foregroundColor(.white))
             .padding()
             .keyboardType(.emailAddress)
             .textInputAutocapitalization(.never)
@@ -96,7 +96,7 @@ fileprivate extension LoginView {
                 }
             }
         }) {
-            Text("Продолжить")
+            Text("Continue")
                 .font(.headline)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
@@ -113,7 +113,7 @@ fileprivate extension LoginView {
             Rectangle()
                 .frame(height: 1)
                 .foregroundColor(.gray.opacity(0.5))
-            Text("ИЛИ")
+            Text("OR")
                 .foregroundColor(.white)
                 .font(.system(size: 14))
             Rectangle()

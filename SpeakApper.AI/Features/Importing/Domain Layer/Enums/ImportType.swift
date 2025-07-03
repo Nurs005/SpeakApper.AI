@@ -12,9 +12,9 @@ enum ImportType: String, CaseIterable {
     
     var title: String {
         switch self {
-            case .dictaphone: return "Диктофон"
-            case .messengers: return "Мессенджеры"
-            case .files: return "Из файлов"
+            case .dictaphone: return "Dictaphone"
+            case .messengers: return "Messengers"
+            case .files: return "From Files"
         }
     }
     
@@ -22,19 +22,19 @@ enum ImportType: String, CaseIterable {
         switch self {
             case .dictaphone:
                 return [
-                    ImportStep(imageName: "step1_dictaphone", title: "Шаг 1", description: "Откройте 'Диктофон', выберите аудиозапись"),
-                    ImportStep(imageName: "step2_dictaphone", title: "Шаг 2", description: "Нажмите, чтобы поделиться"),
-                    ImportStep(imageName: "step3_dictaphone", title: "Шаг 3", description: "Выберите SpeakApper и поделитесь аудио")
+                    ImportStep(imageName: "step1_dictaphone", title: "Step 1", description: "Open 'Dictaphone' and choose a recording"),
+                    ImportStep(imageName: "step2_dictaphone", title: "Step 2", description: "Tap to share"),
+                    ImportStep(imageName: "step3_dictaphone", title: "Step 3", description: "Select SpeakApper and share the audio")
                 ]
             case .messengers:
                 return [
-                    ImportStep(imageName: "step1_messenger", title: "Шаг 1", description: "Откройте мессенджер, выберите аудиосообщение"),
-                    ImportStep(imageName: "step2_messenger", title: "Шаг 2", description: "Выберите SpeakApper и поделитесь аудио")
+                    ImportStep(imageName: "step1_messenger", title: "Step 1", description: "Open the messenger and select the voice message"),
+                    ImportStep(imageName: "step2_messenger", title: "Step 2", description: "Select SpeakApper and share the audio")
                 ]
             case .files:
                 return [
-                    ImportStep(imageName: "step1_files", title: "Шаг 1", description: "Откройте 'Файлы', выберите аудио или голосовой файл и нажмите 'Поделиться'"),
-                    ImportStep(imageName: "step2_files", title: "Шаг 2", description: "Выберите SpeakApper и поделитесь аудио")
+                    ImportStep(imageName: "step1_files", title: "Step 1", description: "Open 'Files', choose the audio or voice file and tap 'Share'"),
+                    ImportStep(imageName: "step2_files", title: "Step 2", description: "Select SpeakApper and share the audio")
                 ]
         }
     }

@@ -48,7 +48,7 @@ struct ImportRecordView: View {
                 }
                 .padding(.leading, 8)
                 
-                Text("Импорт файлов")
+                Text("Import files")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.leading, 16)

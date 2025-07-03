@@ -19,7 +19,7 @@ struct PaywallView: View {
 
     var body: some View {
         VStack {
-            // Кнопка закрытия
+            // Close button
             HStack {
                 Button(action: {
                     onFinish()
@@ -32,8 +32,8 @@ struct PaywallView: View {
                 Spacer()
             }
 
-            // Заголовок
-            Text("Выберите план")
+            // Title
+            Text("Choose a plan")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.white)
                 .padding(.bottom, 36)
@@ -76,14 +76,14 @@ struct PaywallView: View {
                 if  selectedOption != nil {
                     paywallViewModel.purchase(option: selectedOption!, isTrial: isTrialEnabled)
                   } else {
-                      // Например просто закрыть пейвол или ничего не делать
+                      // For example simply close the paywall or do nothing
                       onFinish()
                   }
             }) {
                 Text(
                     selectedOption == nil
-                        ? "Продолжить"
-                        : (paywallViewModel.isPurchasing ? "Покупаем..." : "Оформить подписку")
+                        ? "Continue"
+                        : (paywallViewModel.isPurchasing ? "Purchasing..." : "Subscribe")
                 )
                     .bold()
                     .frame(maxWidth: .infinity)
@@ -96,13 +96,13 @@ struct PaywallView: View {
             .disabled(selectedOption == nil || paywallViewModel.isPurchasing)
             .opacity(paywallViewModel.isPurchasing ? 0.5 : 1.0)
 
-            // Условия
+            // Terms
             HStack {
-                Text("Условия использования")
+                Text("Terms of Use")
                 Spacer()
-                Text("Политика конфиденциальности")
+                Text("Privacy Policy")
                 Spacer()
-                Text("Восстановить покупки")
+                Text("Restore Purchases")
             }
             .foregroundColor(.gray)
             .font(.system(size: 14))

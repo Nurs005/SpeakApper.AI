@@ -36,24 +36,24 @@ struct CustomDeleteReasonView: View {
         .sheet(isPresented: $showMailView) {
             SendMailView(
                 recipients: ["support@speakapper.com"],
-                subject: "Причина удаления аккаунта (Другое)",
-                messageBody: reasonText.isEmpty ? "Пользователь не указал причину." : reasonText,
+                subject: "Account deletion reason (Other)",
+                messageBody: reasonText.isEmpty ? "User did not specify a reason." : reasonText,
                 isHTML: false
             )
         }
-        .alert("Не удалось отправить письмо", isPresented: $showAlert) {
-            Button("Ок", role: .cancel) {}
+        .alert("Could not send email", isPresented: $showAlert) {
+            Button("OK", role: .cancel) {}
         }
         .presentationDetents([.fraction(0.45)])
     }
 
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Есть еще причина? Мы будем рады вашим отзывам!")
+            Text("Another reason? We'd love your feedback!")
                 .foregroundColor(.white)
                 .font(.system(size: 18, weight: .bold))
 
-            Text("Поделитесь с нами своей причиной, чтобы мы могли учиться и совершенствоваться.")
+            Text("Share your reason with us so we can learn and improve.")
                 .foregroundColor(.gray)
                 .font(.system(size: 14))
 
@@ -65,7 +65,7 @@ struct CustomDeleteReasonView: View {
     private var textEditor: some View {
         ZStack(alignment: .topLeading) {
             if reasonText.isEmpty {
-                Text("Причина удаления аккаунта")
+                Text("Reason for deleting account")
                     .foregroundColor(.gray)
                     .padding(.top, 12)
                     .padding(.leading, 12)
@@ -87,7 +87,7 @@ struct CustomDeleteReasonView: View {
                 showAlert = true
             }
         }) {
-            Text("Сохранять")
+            Text("Submit")
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
                 .background(reasonText.isEmpty ? Color.gray.opacity(0.3) : Color(hex: "#6F7CFF"))

@@ -11,7 +11,7 @@ struct BuyPremiumView: View {
     var body: some View {
         HStack(spacing: 4) {
             Image(.premiumLightning)
-            Text("Попробуйте SpeakApper Premium бесплатно\nНажмите, чтобы попробовать сейчас!")
+            Text("Try SpeakApper Premium for free\nTap to start now!")
                 .font(.system(size: 15))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)

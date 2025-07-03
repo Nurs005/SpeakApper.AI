@@ -26,7 +26,7 @@ final class RecordingDetailViewModel: NSObject,
 
     // MARK: – UI state
     @Published var transcriptionText: String = ""
-    @Published var audioTitle: String = "Аудиозапись"
+    @Published var audioTitle: String = "Audio recording"
     @Published var audioDuration: String = ""
     @Published var isPlaying: Bool = false
     @Published var isTranscribing: Bool = false
@@ -118,7 +118,7 @@ final class RecordingDetailViewModel: NSObject,
             guard let self else { return }
             DispatchQueue.main.async {
                 self.isTranscribing = false
-                let result = text ?? "Не удалось транскрибировать запись"
+                let result = text ?? "Could not transcribe recording"
                 self.transcriptionText = result
                 self.audioTitle        = Self.generateTitle(from: result)
             }
@@ -243,7 +243,7 @@ final class RecordingDetailViewModel: NSObject,
         guard let url = URL(string:
             "https://mystical-height-454513-u4.uc.r.appspot.com/v1/gateway/ai")
         else {
-            aiError = "Неверный URL"
+            aiError = "Invalid URL"
             return
         }
 
@@ -305,7 +305,7 @@ final class RecordingDetailViewModel: NSObject,
                 previousAction: oldAction
             )
         }
-        undo.setActionName("AI-действие")
+        undo.setActionName("AI Action")
     }
 
     private func registerRedoForAI(
@@ -330,7 +330,7 @@ final class RecordingDetailViewModel: NSObject,
                 newAction: afterAction ?? ""
             )
         }
-        undo.setActionName("AI-действие")
+        undo.setActionName("AI Action")
     }
 
     func registerUndoForTextEdit(oldText: String) {
@@ -341,7 +341,7 @@ final class RecordingDetailViewModel: NSObject,
             target.transcriptionText = oldText
             target.registerRedoForTextEdit(afterText: redoText)
         }
-        undo.setActionName("Редактирование транскрипции")
+        undo.setActionName("Transcription edit")
     }
 
     private func registerRedoForTextEdit(afterText: String) {
@@ -353,7 +353,7 @@ final class RecordingDetailViewModel: NSObject,
             
             target.registerUndoForTextEdit(oldText: undoText)
         }
-        undo.setActionName("Редактирование транскрипции")
+        undo.setActionName("Transcription edit")
     }
 
     // MARK: – OpenAIResponse

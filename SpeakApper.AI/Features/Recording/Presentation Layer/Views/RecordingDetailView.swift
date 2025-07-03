@@ -39,7 +39,7 @@ struct LanguagePickerView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .navigationTitle("Язык голоса на записи")
+            .navigationTitle("Recording language")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -113,10 +113,10 @@ struct RecordingDetailView: View {
         .overlay(customExportMenu, alignment: .bottomTrailing)
         .onDisappear { viewModel.stopPlayback() }
         
-        // MARK: – Keyboard toolbar (Отмена / Сохранить)
+        // MARK: – Keyboard toolbar (Cancel / Save)
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
-                Button("Отмена") {
+                Button("Cancel") {
                     viewModel.revertChanges()
                     isEditingTranscript = false
                 }
@@ -124,7 +124,7 @@ struct RecordingDetailView: View {
                 
                 Spacer()
                 
-                Button("Сохранить") {
+                Button("Save") {
                     viewModel.saveTranscription()
                     isEditingTranscript = false
                 }
@@ -144,7 +144,7 @@ struct RecordingDetailView: View {
             Button { dismiss() } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "chevron.left")
-                    Text("Назад")
+                    Text("Back")
                 }
                 .font(.system(size: 17, weight: .medium))
             }
@@ -194,9 +194,9 @@ struct RecordingDetailView: View {
                 .foregroundColor(.white.opacity(0.5))
         
             Menu {
-                Button("Поделиться аудио") { showShareSheet = true }
+                Button("Share audio") { showShareSheet = true }
                 
-                Menu("Скорость воспроизведения") {
+                Menu("Playback speed") {
                     ForEach([1.0, 1.2, 1.5, 2.0], id: \.self) { rate in
                         Button {
                             playbackRate = Float(rate)
@@ -232,7 +232,7 @@ struct RecordingDetailView: View {
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "#7B87FF")))
                 .scaleEffect(1.4)
-            Text("Транскрибирование аудиозаписи")
+            Text("Transcribing audio")
                 .font(.system(size: 15))
                 .foregroundColor(.gray)
             Spacer()
@@ -242,7 +242,7 @@ struct RecordingDetailView: View {
     private var errorView: some View {
         VStack {
             Spacer()
-            Text("Не удалось транскрибировать запись.")
+            Text("Failed to transcribe recording.")
                 .font(.system(size: 15))
                 .foregroundColor(.gray)
             Spacer()
@@ -254,7 +254,7 @@ struct RecordingDetailView: View {
         HStack(spacing: 8) {
             let header = viewModel.lastAIAction
                 .map { "AI – \(displayName(for: $0))" }
-                ?? "Транскрипция – \(viewModel.selectedLanguage.displayName)"
+                ?? "Transcription – \(viewModel.selectedLanguage.displayName)"
             
             Text(header)
                 .font(.system(size: 14, weight: .medium))
@@ -373,7 +373,7 @@ struct RecordingDetailView: View {
         VStack {
             Spacer()
             if showCopiedAlert {
-                Text("Текст скопирован")
+                Text("Text copied")
                     .font(.system(size: 14, weight: .medium))
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
@@ -392,7 +392,7 @@ struct RecordingDetailView: View {
         Group {
             if showCustomExport {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Отправить как")
+                    Text("Send as")
                         .font(.footnote)
                         .foregroundColor(.gray)
                         .padding(.horizontal, 12)
@@ -418,7 +418,7 @@ struct RecordingDetailView: View {
                     
                     Divider().background(Color.white.opacity(0.15))
                     
-                    Button("Текст") {
+                    Button("Text") {
                         export(.txt)
                     }
                     .foregroundColor(.white)
@@ -438,15 +438,15 @@ struct RecordingDetailView: View {
     // MARK: – Helper
     private func displayName(for action: String) -> String {
         switch action {
-            case "structurize":     return "Добавить структуру"
-            case "summarizePromt":  return "Резюмировать"
-            case "frendly":         return "Дружелюбно"
-            case "note":            return "Заметка"
-            case "bussiness":       return "Бизнес"
-            case "blog":            return "Блог"
-            case "proffesional":    return "Профессионально"
-            case "nefor":           return "Информативно"
-            case "song":            return "Песня"
+            case "structurize":     return "Add structure"
+            case "summarizePromt":  return "Summarize"
+            case "frendly":         return "Friendly"
+            case "note":            return "Note"
+            case "bussiness":       return "Business"
+            case "blog":            return "Blog"
+            case "proffesional":    return "Professional"
+            case "nefor":           return "Informative"
+            case "song":            return "Song"
             case "angryBird":       return "Angry Bird"
             default:                return action.capitalized
         }

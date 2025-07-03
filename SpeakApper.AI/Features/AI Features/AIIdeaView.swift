@@ -76,7 +76,7 @@ fileprivate extension AIIdeaView {
                 .padding(.trailing, 4)
             }
             
-            Text("Не хватает функции?\nПоделитесь своей идеей")
+            Text("Missing a feature?\nShare your idea")
                 .font(.system(size: 21, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -84,7 +84,7 @@ fileprivate extension AIIdeaView {
     }
 
     var contactDescriptionView: some View {
-        Text("Хотите помочь сформировать будущее SpeakApper? Поделитесь своим именем и адресом электронной почты, чтобы получить приглашение предоставить отзыв о новых функциях.")
+        Text("Want to help shape SpeakApper's future? Share your name and email to get invited to provide feedback on new features.")
             .font(.system(size: 16))
             .foregroundColor(.white.opacity(0.7))
             .multilineTextAlignment(.leading)
@@ -99,7 +99,7 @@ fileprivate extension AIIdeaView {
                 .cornerRadius(12)
 
             if featureIdea.isEmpty {
-                Text("Опишите функцию, которую вы хотели бы использовать")
+                Text("Describe the feature you would like to use")
                     .foregroundColor(.gray)
                     .padding(.top, 12)
                     .padding(.leading, 12)
@@ -117,8 +117,8 @@ fileprivate extension AIIdeaView {
 
     var contactForm: some View {
         VStack(spacing: 12) {
-            CustomTextField(placeholder: "Имя", text: $name)
-            CustomTextField(placeholder: "Электронная почта", text: $email, keyboardType: .emailAddress)
+            CustomTextField(placeholder: "Name", text: $name)
+            CustomTextField(placeholder: "Email", text: $email, keyboardType: .emailAddress)
         }
     }
 
@@ -130,7 +130,7 @@ fileprivate extension AIIdeaView {
                 showContactForm = true
             }
         }) {
-            Text(showContactForm ? "Отправить" : "Запросить функцию")
+            Text(showContactForm ? "Send" : "Request feature")
                 .font(.system(size: 17, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .padding()

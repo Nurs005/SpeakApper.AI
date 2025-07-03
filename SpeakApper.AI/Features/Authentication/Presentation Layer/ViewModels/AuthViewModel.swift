@@ -38,12 +38,12 @@ class AuthViewModel: ObservableObject {
     // MARK: - Отправка OTP-кода
     func sendOTP(to email: String) async -> Bool {
         guard !email.isEmpty else {
-            errorMessage = "Введите email"
+            errorMessage = "Enter email"
             return false
         }
         
         guard let url = URL(string: "https://mystical-height-454513-u4.uc.r.appspot.com/v1/gateway/otp") else {
-            errorMessage = "Неверный URL"
+            errorMessage = "Invalid URL"
             return false
         }
         
@@ -75,14 +75,14 @@ class AuthViewModel: ObservableObject {
                 print("OTP отправлен на \(email)")
                 return true
             } else {
-                let responseString = String(data: data, encoding: .utf8) ?? "Нет ответа"
-                errorMessage = "Ошибка отправки: \(responseString)"
-                print("Ошибка ответа: \(responseString)")
+                let responseString = String(data: data, encoding: .utf8) ?? "No response"
+                errorMessage = "Send error: \(responseString)"
+                print("Response error: \(responseString)")
                 return false
             }
         } catch {
-            errorMessage = "Ошибка отправки OTP: \(error.localizedDescription)"
-            print("Ошибка запроса: \(error.localizedDescription)")
+            errorMessage = "Failed to send OTP: \(error.localizedDescription)"
+            print("Request error: \(error.localizedDescription)")
             return false
         }
     }
@@ -90,7 +90,7 @@ class AuthViewModel: ObservableObject {
     // MARK: - Подтверждение OTP-кода
     func verifyOTP(email: String, code: String) async -> Bool {
         guard !email.isEmpty, !code.isEmpty else {
-            errorMessage = "Введите email и код"
+            errorMessage = "Enter email and code"
             return false
         }
         
@@ -101,12 +101,12 @@ class AuthViewModel: ObservableObject {
             
             guard let data = snapshot.data(),
                   let storedOTP = data["otp"] as? String else {
-                errorMessage = "Код не найден. Запросите новый."
+                errorMessage = "Code not found. Request a new one."
                 return false
             }
             
             guard storedOTP == code else {
-                errorMessage = "Неверный код"
+                errorMessage = "Invalid code"
                 return false
             }
             
@@ -122,12 +122,12 @@ class AuthViewModel: ObservableObject {
                 return true
                 
             } catch {
-                self.errorMessage = "Ошибка регистрации: \(error.localizedDescription)"
+                self.errorMessage = "Registration error: \(error.localizedDescription)"
                 return false
             }
             
         } catch {
-            self.errorMessage = "Ошибка проверки OTP: \(error.localizedDescription)"
+            self.errorMessage = "OTP verification error: \(error.localizedDescription)"
             return false
         }
     }
@@ -147,7 +147,7 @@ class AuthViewModel: ObservableObject {
                     guard let nonce = currentNonce,
                           let appleIDToken = appleIDCredential.identityToken,
                           let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-                        errorMessage = "Ошибка получения токена Apple"
+                        errorMessage = "Failed to get Apple token"
                         return
                     }
                     
@@ -161,11 +161,11 @@ class AuthViewModel: ObservableObject {
                         self.isLoggedIn = true
                         UserDefaults.standard.set(self.email, forKey: "userEmail")
                     } catch {
-                        errorMessage = "Ошибка входа через Apple ID: \(error.localizedDescription)"
+                        errorMessage = "Apple ID sign-in error: \(error.localizedDescription)"
                     }
                 }
             case .failure(let error):
-                errorMessage = "Ошибка авторизации через Apple: \(error.localizedDescription)"
+                errorMessage = "Apple authorization error: \(error.localizedDescription)"
         }
     }
     
@@ -177,7 +177,7 @@ class AuthViewModel: ObservableObject {
             self.email = ""
             UserDefaults.standard.removeObject(forKey: "userEmail")
         } catch {
-            self.errorMessage = "Ошибка выхода: \(error.localizedDescription)"
+            self.errorMessage = "Sign-out error: \(error.localizedDescription)"
         }
     }
     
@@ -185,7 +185,7 @@ class AuthViewModel: ObservableObject {
     func deleteAccount() async {
         guard let user = Auth.auth().currentUser else {
             await MainActor.run {
-                self.errorMessage = "Ошибка: Пользователь не найден"
+                self.errorMessage = "Error: User not found"
             }
             return
         }
@@ -207,7 +207,7 @@ class AuthViewModel: ObservableObject {
             
         } catch {
             await MainActor.run {
-                self.errorMessage = "Ошибка удаления аккаунта: \(error.localizedDescription)"
+                self.errorMessage = "Account deletion error: \(error.localizedDescription)"
             }
         }
     }
@@ -224,7 +224,7 @@ class AuthViewModel: ObservableObject {
         var randomBytes = [UInt8](repeating: 0, count: length)
         let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
         if errorCode != errSecSuccess {
-            fatalError("Ошибка генерации nonce")
+            fatalError("Nonce generation error")
         }
         
         let charset: [Character] =
