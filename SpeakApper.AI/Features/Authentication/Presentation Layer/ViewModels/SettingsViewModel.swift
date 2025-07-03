@@ -10,7 +10,7 @@ import FirebaseAuth
 
 @MainActor
 class SettingsViewModel: ObservableObject {
-    @Published var email: String = "Гость"
+    @Published var email: String = "Guest"
     @Published var isLoggedIn: Bool = false
     @Published var cacheSizeString = "(0 KB)"
     private let recordingUseCase: RecordingUseCaseProtocol
@@ -37,7 +37,7 @@ class SettingsViewModel: ObservableObject {
     
     func logout() {
         authViewModel.signOut()
-        self.email = "Гость"
+        self.email = "Guest"
         self.isLoggedIn = false
     }
     

@@ -14,14 +14,14 @@ struct DeleteAccountSurveyView: View {
     @State private var showFinalAlert = false
     
     let reasons = [
-        "Возникли проблемы с оплатой",
-        "Ненадежный или глючный",
-        "Использование альтернативного приложения",
-        "Слишком дорого",
-        "Не использую его",
-        "Приложение сложно использовать",
-        "Отсутствие функциональности",
-        "Другое"
+        "Payment issues",
+        "Unstable or buggy",
+        "Using another app",
+        "Too expensive",
+        "I don't use it",
+        "App is hard to use",
+        "Missing functionality",
+        "Other"
     ]
     
     var body: some View {
@@ -61,7 +61,7 @@ private extension DeleteAccountSurveyView {
     }
     
     var titleView: some View {
-        Text("Выберите основную причину удаления вашего аккаунта")
+        Text("Select the main reason for deleting your account")
             .font(.system(size: 21, weight: .bold))
             .foregroundColor(.white)
             .multilineTextAlignment(.leading)
@@ -103,7 +103,7 @@ private extension DeleteAccountSurveyView {
     
     var continueButton: some View {
         Button(action: {
-            if selectedReason == "Другое" {
+            if selectedReason == "Other" {
                 coordinator.presentSheet(.customFeedback)
             } else {
                 withAnimation {
@@ -111,7 +111,7 @@ private extension DeleteAccountSurveyView {
                 }
             }
         }) {
-            Text("Продолжить удаление")
+            Text("Continue deletion")
                 .font(.system(size: 17))
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
@@ -130,14 +130,14 @@ private extension DeleteAccountSurveyView {
         VStack {
             Spacer()
             VStack(spacing: 16) {
-                Text("Спасибо за ваш отзыв!")
+                Text("Thank you for your feedback!")
                     .font(.system(size: 21, weight: .medium))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
                 
-                Text("Мы можем помочь решить эту проблему. Пожалуйста, свяжитесь с нашей службой поддержки и предоставьте более подробную информацию.")
+                Text("We can help resolve this issue. Please contact our support team and provide more details.")
                     .font(.system(size: 16))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.leading)
@@ -161,7 +161,7 @@ private extension DeleteAccountSurveyView {
         Button(action: {
             coordinator.presentSheet(.sendFeedback)
         }) {
-            Text("Связаться со службой поддержки")
+            Text("Contact Support")
                 .font(.system(size: 17, weight: .medium))
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
@@ -176,7 +176,7 @@ private extension DeleteAccountSurveyView {
         Button(action: {
             deleteAccount()
         }) {
-            Text("Удалить аккаунт")
+            Text("Delete account")
                 .font(.system(size: 17))
                 .frame(maxWidth: .infinity)
                 .foregroundColor(.red)

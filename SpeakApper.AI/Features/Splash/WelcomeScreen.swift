@@ -22,7 +22,7 @@ struct WelcomeScreen: View {
                 .padding()
 
             Text(
-                "Загружайте или записывайте аудио на любом языке для мгновенного преобразования."
+                "Upload or record audio in any language for instant transcription."
             )
             .font(.system(size: 18))
             .foregroundColor(.white)

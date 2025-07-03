@@ -34,33 +34,33 @@ enum ProductType: String, CaseIterable{
     var title: String {
         switch self {
         case .annual:
-            return "Годовой план"
+            return "Annual plan"
         case .monthly:
-            return "Mecячный план"
+            return "Monthly plan"
         case .weekly:
-            return "Недельный план"
+            return "Weekly plan"
         }
     }
     
     var subtitle: String {
         switch self {
         case .annual:
-            return "всего %@ в месяц"
+            return "just %@ per month"
         case .monthly:
-            return "всего %@ в день"
+            return "just %@ per day"
         case .weekly:
-            return "всего %@ в день"
+            return "just %@ per day"
         }
     }
     
     var price: String {
         switch self {
         case .annual:
-            return "%@ в год"
+            return "%@ per year"
         case .monthly:
-            return "%@ в месяц"
+            return "%@ per month"
         case .weekly:
-            return "%@ в неделю"
+            return "%@ per week"
         }
     }
     

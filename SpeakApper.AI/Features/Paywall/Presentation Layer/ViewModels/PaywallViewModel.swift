@@ -30,16 +30,16 @@ class PaywallViewModel: ObservableObject {
             self.subscritpionMap = [:]
             self.SubscriptionOptions = []
 
-            // Заполняем мапу, группируя по типу
+            // Fill the map, grouping by type
             for product in subscriptionManager.products {
                 _ = makeSubscriptionOption(from: product)
             }
 
-            // Теперь просто берем все уникальные опции
+            // Grab all unique options
             self.SubscriptionOptions = Array(subscritpionMap.values)
             
         } catch {
-            self.errorMessage = "Не удалось загрузить подписки"
+            self.errorMessage = "Failed to load subscriptions"
         }
     }
 
@@ -54,7 +54,7 @@ class PaywallViewModel: ObservableObject {
                 }
                 try await subscriptionManager.purchase(product)
             } catch {
-                errorMessage = "Покупка не удалась"
+                errorMessage = "Purchase failed"
             }
             isPurchasing = false
         }
@@ -93,10 +93,10 @@ class PaywallViewModel: ObservableObject {
 
 
     //           SubscriptionOption(
-    //               title: "Годовой план", subtitle: "всего 2 082 kzt в месяц",
-    //               price: "24 990 kzt в год", isBestValue: true),
+    //               title: "Annual plan", subtitle: "just 2 082 kzt per month",
+    //               price: "24 990 kzt per year", isBestValue: true),
     //           SubscriptionOption(
-    //               title: "3 дня бесплатно", subtitle: "затем 6 990 kzt в месяц",
+    //               title: "3 days free", subtitle: "then 6 990 kzt per month",
     //               price: "", isBestValue: false),
     //       ]
 
@@ -104,45 +104,45 @@ class PaywallViewModel: ObservableObject {
         PaywallSlide(
             features: [
                 PaywallFeature(
-                    icon: "mic.fill", text: "Максимум 100 минут за запись"),
+                    icon: "mic.fill", text: "Up to 100 minutes per recording"),
                 PaywallFeature(
-                    icon: "folder.fill", text: "Неограниченное число записей"),
+                    icon: "folder.fill", text: "Unlimited recordings"),
                 PaywallFeature(
                     icon: "wand.and.stars",
-                    text: "AI-фильтры для редактирования текста"),
-                PaywallFeature(icon: "globe", text: "Перевод на 20+ языков"),
+                    text: "AI filters for text editing"),
+                PaywallFeature(icon: "globe", text: "Translation to 20+ languages"),
                 PaywallFeature(
                     icon: "square.and.arrow.down",
-                    text: "Импорт и экспорт записей"),
+                    text: "Import and export recordings"),
             ], review: nil),
 
         PaywallSlide(
             features: [
                 PaywallFeature(
-                    icon: "mic.fill", text: "Максимум 100 минут за запись"),
+                    icon: "mic.fill", text: "Up to 100 minutes per recording"),
                 PaywallFeature(
-                    icon: "folder.fill", text: "Неограниченное число записей"),
+                    icon: "folder.fill", text: "Unlimited recordings"),
                 PaywallFeature(
                     icon: "wand.and.stars",
-                    text: "AI-фильтры для редактирования текста"),
-                PaywallFeature(icon: "globe", text: "Перевод на 20+ языков"),
+                    text: "AI filters for text editing"),
+                PaywallFeature(icon: "globe", text: "Translation to 20+ languages"),
                 PaywallFeature(
                     icon: "square.and.arrow.down",
-                    text: "Импорт и экспорт записей"),
+                    text: "Import and export recordings"),
             ], review: nil),
 
         PaywallSlide(
             features: [
                 PaywallFeature(
                     icon: "captions.bubble.fill",
-                    text: "Автоматические субтитры"),
+                    text: "Automatic captions"),
                 PaywallFeature(
                     icon: "bubble.left.and.bubble.right.fill",
-                    text: "Поддержка диалогов"),
+                    text: "Conversation support"),
                 PaywallFeature(
-                    icon: "textformat.abc", text: "Редактирование пунктуации"),
+                    icon: "textformat.abc", text: "Punctuation editing"),
                 PaywallFeature(
-                    icon: "clock.arrow.circlepath", text: "Сохранение истории"),
+                    icon: "clock.arrow.circlepath", text: "History saving"),
             ], review: nil),
 
         PaywallSlide(
@@ -151,7 +151,7 @@ class PaywallViewModel: ObservableObject {
                 PaywallReview(
                     username: "marlmyn", rating: 5,
                     reviewText:
-                        "SpeakApper – это отличное решение для тех, кто часто работает с аудио и хочет быстро получать качественные текстовые расшифровки. 🚀🔥"
+                        "SpeakApper is an excellent solution for those who often work with audio and want quick, high-quality transcriptions. 🚀🔥"
                 )
         ),
     ]

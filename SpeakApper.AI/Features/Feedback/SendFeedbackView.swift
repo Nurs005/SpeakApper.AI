@@ -48,14 +48,14 @@ struct SendFeedbackView: View {
                 Device: \(deviceName)
                 UID: \(uid)
                 Source: settings
-                От: \(viewModel.email.isEmpty ? "Гость" : viewModel.email)
-                Отправлено с iPhone
+                From: \(viewModel.email.isEmpty ? "Guest" : viewModel.email)
+                Sent from iPhone
                 """,
                 isHTML: false
             )
         }
-        .alert("Не удалось отправить письмо", isPresented: $mailErrorAlert) {
-            Button("Ок", role: .cancel) {}
+        .alert("Could not send email", isPresented: $mailErrorAlert) {
+            Button("OK", role: .cancel) {}
         }
     }
 }

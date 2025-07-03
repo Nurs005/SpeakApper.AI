@@ -35,7 +35,7 @@ fileprivate extension SettingsView {
         }) {
             HStack {
                 Image(systemName: "chevron.left")
-                Text("Назад")
+                Text("Back")
             }
             .foregroundColor(.white)
             .font(.system(size: 17))
@@ -54,7 +54,7 @@ fileprivate extension SettingsView {
     }
     
     var title: some View {
-        Text("Настройки")
+        Text("Settings")
             .font(.system(size: 28, weight: .bold))
             .foregroundColor(.white)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -64,10 +64,10 @@ fileprivate extension SettingsView {
     var accountButton: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(viewModel.email.isEmpty ? "Гость" : viewModel.email)
+                Text(viewModel.email.isEmpty ? "Guest" : viewModel.email)
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.white)
-                Text("Ваш аккаунт")
+                Text("Your account")
                     .font(.system(size: 14))
                     .foregroundColor(.gray)
             }
@@ -81,7 +81,7 @@ fileprivate extension SettingsView {
                 Button(action: {
                     coordinator.push(.login)
                 }) {
-                    Text("Зарегистрироваться / Войти")
+                    Text("Sign Up / Log In")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(Color(.white))
                         .padding(.horizontal, 12)
@@ -111,7 +111,7 @@ fileprivate extension SettingsView {
     }
     
     var appSection: some View {
-        Section(header: Text("Приложение").textCase(nil).foregroundColor(.gray)) {
+        Section(header: Text("App").textCase(nil).foregroundColor(.gray)) {
             VStack(spacing: 8) {
                 ForEach(QuickActionType.allCases.filter { $0.category == .apps }, id: \.self) { action in
                     QuickActionView(
@@ -129,7 +129,7 @@ fileprivate extension SettingsView {
     }
     
     var supportSection: some View {
-        Section(header: Text("Поддержка и обратная связь").textCase(nil).foregroundColor(.gray)) {
+        Section(header: Text("Support & Feedback").textCase(nil).foregroundColor(.gray)) {
             VStack(spacing: 8) {
                 ForEach(QuickActionType.allCases.filter { $0.category == .support }, id: \.self) { action in
                     QuickActionView(
@@ -147,12 +147,12 @@ fileprivate extension SettingsView {
     }
     
     var dataManagementSection: some View {
-        Section(header: Text("Управление данными").foregroundColor(.gray)) {
+        Section(header: Text("Data Management").foregroundColor(.gray)) {
             Button(role: .destructive) { showAlert = true } label: {
                 HStack(spacing: 16) {
                     Image(systemName: "trash")
                         .resizable().frame(width: 24, height: 24)
-                    Text("Удалить все записи")
+                    Text("Delete all recordings")
                     Spacer()
                     Text(viewModel.cacheSizeString)
                         .foregroundColor(.gray)
@@ -160,12 +160,12 @@ fileprivate extension SettingsView {
                 .foregroundColor(.white)
             }
         }
-        .alert("Удалить все записи?",
+        .alert("Delete all recordings?",
                isPresented: $showAlert) {
-            Button("Удалить", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 viewModel.deleteAll()
             }
-            Button("Отмена", role: .cancel) { }
+            Button("Cancel", role: .cancel) { }
         }
                .listRowBackground(Color("listColor"))
     }

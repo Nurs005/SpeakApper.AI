@@ -23,7 +23,7 @@ struct SubscriptionOptionsView: View {
 
             if let selected = selectedOption, selected.isTrialEnabled {
                 Toggle(isOn: $isTrialEnabled) {
-                    Text("Попробовать бесплатно")
+                    Text("Try for free")
                         .foregroundColor(.white)
                         .font(.system(size: 16, weight: .bold))
                 }
@@ -65,7 +65,7 @@ struct SubscriptionOptionsView: View {
             Spacer()
 
             if option.isBestValue {
-                Text("Сэкономьте 70%")
+                Text("Save 70%")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 6)

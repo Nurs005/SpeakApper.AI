@@ -39,7 +39,7 @@ private extension AccountSettingsView {
         HStack {
             Button(action: { coordinator.pop() }) {
                 Image(systemName: "chevron.left")
-                Text("Назад")
+                Text("Back")
             }
             .foregroundColor(.white)
             .font(.system(size: 17))
@@ -50,7 +50,7 @@ private extension AccountSettingsView {
     }
     
     var title: some View {
-        Text("Настройки аккаунта")
+        Text("Account settings")
             .font(.system(size: 28).bold())
             .foregroundColor(.white)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -62,7 +62,7 @@ private extension AccountSettingsView {
             Text(authViewModel.email)
                 .font(.system(size: 17))
                 .foregroundColor(.white)
-            Text("Ваш адрес электронной почты")
+            Text("Your email address")
                 .font(.system(size: 14))
                 .foregroundColor(.gray)
         }
@@ -77,7 +77,7 @@ private extension AccountSettingsView {
                 .scaledToFit()
                 .foregroundStyle(.white)
                 .frame(width: 24, height: 24)
-            Text("Войти через Apple")
+            Text("Sign in with Apple")
                 .font(.system(size: 14))
                 .foregroundStyle(.white)
         }
@@ -87,7 +87,7 @@ private extension AccountSettingsView {
     
     var settingsForm: some View {
         Form {
-            Section(header: Text("Другое").foregroundColor(.gray)) {
+            Section(header: Text("Other").foregroundColor(.gray)) {
                 deleteAccountButton
                 logoutButton
             }
@@ -101,14 +101,14 @@ private extension AccountSettingsView {
         HStack {
             Image(systemName: "trash")
                 .foregroundColor(.white)
-            Text("Удалить аккаунт")
+            Text("Delete account")
                 .foregroundColor(.white)
                 .font(.system(size: 17))
             Spacer()
             Button(action: {
                 showDeleteSurvey = true
             }) {
-                Text("Удалить")
+                Text("Delete")
                     .foregroundColor(.red)
                     .font(.system(size: 17))
             }
@@ -123,7 +123,7 @@ private extension AccountSettingsView {
         HStack {
             Image(systemName: "rectangle.portrait.and.arrow.right")
                 .foregroundColor(.white)
-            Text("Выйти")
+            Text("Log Out")
                 .foregroundColor(.white)
                 .font(.system(size: 17))
             Spacer()
@@ -140,7 +140,7 @@ private extension AccountSettingsView {
             Spacer()
             VStack(spacing: 16) {
                 // Заголовок
-                Text("Выйти?")
+                Text("Log out?")
                     .font(.system(size: 21, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -148,7 +148,7 @@ private extension AccountSettingsView {
                     .padding(.top, 20)
                 
                 // Описание
-                Text("Точно хотите выйти? Существующие записи будут удалены с этого устройства, но они по-прежнему доступны в вашем аккаунте. Чтобы получить к ним доступ, просто войдите в аккаунт.")
+                Text("Are you sure you want to log out? Existing recordings will be removed from this device but remain in your account. To access them again, simply log in.")
                     .font(.system(size: 16))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.leading)
@@ -162,7 +162,7 @@ private extension AccountSettingsView {
                         coordinator.popToRoot()
                         showLogoutAlert = false
                     }) {
-                        Text("Выйти")
+                        Text("Log Out")
                             .font(.system(size: 17))
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
@@ -178,7 +178,7 @@ private extension AccountSettingsView {
                     Button(action: {
                         showLogoutAlert = false
                     }) {
-                        Text("Отмена")
+                        Text("Cancel")
                             .font(.system(size: 17))
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
