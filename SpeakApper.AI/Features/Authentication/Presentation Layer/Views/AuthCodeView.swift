@@ -46,7 +46,7 @@ private extension AuthCodeView {
         }) {
             HStack {
                 Image(systemName: "chevron.left")
-                Text("Назад")
+                Text("Back")
             }
             .foregroundColor(.white)
             .font(.system(size: 17))
@@ -58,14 +58,14 @@ private extension AuthCodeView {
 
     
     var title: some View {
-        Text("Проверьте электронную почту")
+        Text("Check your email")
             .font(.system(size: 20, weight: .bold))
             .foregroundColor(.white)
             .padding(.bottom, 16)
     }
     
     var subtitle: some View {
-        Text("Мы отправили письмо на адрес \(email). Перейдите по ссылке в письме или введите код. Срок действия кода истекает через 5 минут.")
+        Text("We sent an email to \(email). Follow the link or enter the code. The code expires in 5 minutes.")
             .font(.system(size: 16))
             .frame(maxWidth: .infinity, alignment: .leading)
             .foregroundColor(.gray)
@@ -73,7 +73,7 @@ private extension AuthCodeView {
     }
     
     var otpField: some View {
-        TextField("", text: $authViewModel.otpCode, prompt: Text("Код авторизации").foregroundColor(.white))
+        TextField("", text: $authViewModel.otpCode, prompt: Text("Verification code").foregroundColor(.white))
             .keyboardType(.numberPad)
             .padding()
             .background(RoundedRectangle(cornerRadius: 10).stroke(Color.gray.opacity(0.5)))
@@ -91,7 +91,7 @@ private extension AuthCodeView {
                 }
             }
         }) {
-            Text("Продолжить")
+            Text("Continue")
                 .font(.headline)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)

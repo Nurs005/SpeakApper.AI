@@ -69,7 +69,7 @@ fileprivate extension SendFeedbackView {
                 Button(action: {
                     coordinator.dismissSheet()
                 }) {
-                    Text("Отменить")
+                    Text("Cancel")
                         .foregroundColor(.blue)
                         .font(.system(size: 16))
                 }
@@ -96,19 +96,19 @@ fileprivate extension SendFeedbackView {
     
     var contentBodyView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Кому: support@speakapper.com")
+            Text("To: support@speakapper.com")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.7))
             
             Divider().background(Color.white.opacity(0.2))
             
-            Text("Копия/Скрытая копия; От: \(viewModel.email.isEmpty ? "Гость" : viewModel.email)")
+            Text("Cc/Bcc; From: \(viewModel.email.isEmpty ? \"Guest\" : viewModel.email)")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.7))
             
             Divider().background(Color.white.opacity(0.2))
             
-            Text("Тема: SpeakApp iOS v\(appVersion) (\(buildNumber)) feedback")
+            Text("Subject: SpeakApp iOS v\(appVersion) (\(buildNumber)) feedback")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.7))
             
@@ -130,7 +130,7 @@ fileprivate extension SendFeedbackView {
                 Text("Device: \(deviceName)")
                 Text("UID: \(uid)")
                 Text("Source: settings")
-                Text("Отправлено с iPhone")
+                Text("Sent from iPhone")
                     .padding(.top, 16)
             }
             .font(.system(size: 14))
@@ -142,10 +142,10 @@ fileprivate extension SendFeedbackView {
     
     func sendFeedback() {
         if MFMailComposeViewController.canSendMail() {
-            print("Почта доступна: можно отправить письмо")
+            print("Mail available: can send email")
             showMailView = true
         } else {
-            print("Почта недоступна: пользователь не настроил Mail")
+            print("Mail unavailable: user has no Mail setup")
             mailErrorAlert = true
         }
     }

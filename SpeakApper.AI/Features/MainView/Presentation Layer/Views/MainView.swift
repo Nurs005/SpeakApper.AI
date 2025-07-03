@@ -49,11 +49,11 @@ struct MainView: View {
             .padding(.bottom, 30)
         }
         
-        .alert("Удалить запись?", isPresented: $showingDeleteAlert, presenting: itemToDelete) { item in
-            Button("Удалить", role: .destructive) {
+        .alert("Delete recording?", isPresented: $showingDeleteAlert, presenting: itemToDelete) { item in
+            Button("Delete", role: .destructive) {
                 viewModel.delete(item)
             }
-            Button("Отмена", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         }
     }
 }
@@ -76,7 +76,7 @@ fileprivate extension MainView {
             HStack(spacing: 16) {
                 Image(.mangnifyingglass)
                     .foregroundColor(.white.opacity(0.7))
-                Text("Поиск")
+                Text("Search")
                     .foregroundColor(.white.opacity(0.7))
                 Spacer()
             }
@@ -153,7 +153,7 @@ fileprivate extension MainView {
                         itemToDelete = itemVM
                         showingDeleteAlert = true
                     } label: {
-                        Label("Удалить", systemImage: "trash")
+                        Label("Delete", systemImage: "trash")
                     }
                 }
             }
@@ -165,11 +165,11 @@ fileprivate extension MainView {
     
     var recordingTipView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Начните запись")
+            Text("Start recording")
                 .font(.system(size: 19, weight: .semibold))
                 .foregroundColor(.white)
             
-            Text("Просто нажмите кнопку и сделайте свою первую голосовую запись на...")
+            Text("Just press the button to make your first voice recording...")
                 .font(.system(size: 15))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)

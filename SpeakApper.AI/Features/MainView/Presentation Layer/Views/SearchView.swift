@@ -33,7 +33,7 @@ struct SearchView: View {
                 TextField(
                     "",
                     text: $viewModel.searchText,
-                    prompt: Text("Поиск").foregroundColor(.white.opacity(0.7))
+                    prompt: Text("Search").foregroundColor(.white.opacity(0.7))
                 )
                 .font(.system(size: 17))
                 .foregroundColor(.white)
@@ -44,7 +44,7 @@ struct SearchView: View {
             .background(Color("searchColor"))
             .cornerRadius(10)
 
-            Button("Отменить") {
+            Button("Cancel") {
                 viewModel.searchText = ""
                 dismiss()
             }

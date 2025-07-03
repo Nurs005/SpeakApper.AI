@@ -68,7 +68,7 @@ extension RecordingView {
         HStack(spacing: 32) {
             micControlButton(
                 imageName: "xmark",
-                text: "Отклонить",
+                text: "Discard",
                 backgroundColor: Color(hex: "#3A3A47")
             ) {
                 stopRecording(delete: true)
@@ -76,7 +76,7 @@ extension RecordingView {
             
             micControlButton(
                 imageName: "stop",
-                text: "Сохранить",
+                text: "Save",
                 backgroundColor: Color(hex: "#6F7CFF")
             ) {
                 stopRecording(delete: false)
@@ -84,7 +84,7 @@ extension RecordingView {
             
             micControlButton(
                 imageName: isPaused ? "mic.fill" : "pause",
-                text: isPaused ? "Возобновить" : "Пауза",
+                text: isPaused ? "Resume" : "Pause",
                 backgroundColor: Color(hex: "#2A2A34")
             ) {
                 togglePause()

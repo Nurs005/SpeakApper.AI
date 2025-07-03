@@ -13,11 +13,11 @@ struct AIFilter: Identifiable, Equatable {
 
     enum FilterCategory: String, CaseIterable, Identifiable {
         case favorites = ""
-        case action    = "Действие"
-        case style     = "Стиль"
-        case tone      = "Тон"
-        case fun       = "Весело"
-        case custom    = "Свой"
+        case action    = "Action"
+        case style     = "Style"
+        case tone      = "Tone"
+        case fun       = "Fun"
+        case custom    = "Custom"
 
         var id: Self { self }
         var iconName: String? { self == .favorites ? "star" : nil }
