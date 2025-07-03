@@ -13,7 +13,6 @@ enum Sheet: String, Identifiable {
     }
     
     case importFiles
-    case youtube
     case requestFeature
     case faq
     case sendFeedback

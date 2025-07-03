@@ -74,8 +74,6 @@ extension CoordinatorView {
         switch sheet {
         case .importFiles:
             buildImportSheet()
-        case .youtube:
-            buildYoutubeSheet()
         case .requestFeature:
             buildNewFeatureSheet()
         case .faq:
@@ -171,9 +169,7 @@ extension CoordinatorView {
         return ImportRecordView()
     }
 
-    fileprivate func buildYoutubeSheet() -> some View {
-        return YoutubeView()
-    }
+
 
     fileprivate func buildNewFeatureSheet() -> some View {
         return AIIdeaView()

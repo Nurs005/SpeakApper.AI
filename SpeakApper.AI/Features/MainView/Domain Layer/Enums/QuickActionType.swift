@@ -9,7 +9,6 @@ import Foundation
 
 enum QuickActionType: CaseIterable {
     case importFiles
-    case youtube
     case sendFeedback
     case requestFeature
     case faq
@@ -18,8 +17,6 @@ enum QuickActionType: CaseIterable {
         switch self {
             case .importFiles:
                 return "Import files"
-            case .youtube:
-                return "Youtube to text"
             case .sendFeedback:
                 return "Send feedback"
             case .requestFeature:
@@ -33,8 +30,6 @@ enum QuickActionType: CaseIterable {
         switch self {
             case .importFiles:
                 return "Import recording"
-            case .youtube:
-                return "Youtube"
             case .sendFeedback:
                 return "Feedback"
             case .requestFeature:
@@ -49,8 +44,6 @@ enum QuickActionType: CaseIterable {
         switch self {
             case .importFiles:
                 return "import"
-            case .youtube:
-                return "youtube"
             case .sendFeedback:
                 return "message-outlined"
             case .requestFeature:
@@ -62,7 +55,7 @@ enum QuickActionType: CaseIterable {
     
     var category: QuickActionCategory {
         switch self {
-            case .importFiles, .youtube:
+        case .importFiles:
                 return .apps
             case .sendFeedback, .requestFeature, .faq:
                 return .support
@@ -74,8 +67,6 @@ enum QuickActionType: CaseIterable {
         switch self {
             case .importFiles:
                 return .importFiles
-            case .youtube:
-                return .youtube
             case .sendFeedback:
                 return .sendFeedback
             case .requestFeature:
@@ -87,7 +78,7 @@ enum QuickActionType: CaseIterable {
 }
 
 var mainQuickActions: [QuickActionType] {
-    return [.importFiles, .youtube, .requestFeature, .faq]
+    return [.importFiles,  .requestFeature, .faq]
 }
 
 enum QuickActionCategory {

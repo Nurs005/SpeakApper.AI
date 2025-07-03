@@ -102,7 +102,7 @@ fileprivate extension SendFeedbackView {
             
             Divider().background(Color.white.opacity(0.2))
             
-            Text("Cc/Bcc; From: \(viewModel.email.isEmpty ? \"Guest\" : viewModel.email)")
+            Text("Cc/Bcc; From: \(viewModel.email.isEmpty ? "Guest" : viewModel.email)")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.7))
             
